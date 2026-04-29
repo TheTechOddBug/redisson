@@ -479,7 +479,7 @@ public class RedissonSearchTest extends RedisDockerTest {
 
     @Test
     public void testMapSearchCluster() {
-        withNewCluster((nodes, redisson) -> {
+        testInCluster( redisson -> {
             RMap<String, SimpleObject> m = redisson.getMap("{doc}:1", new CompositeCodec(StringCodec.INSTANCE, redisson.getConfig().getCodec()));
             m.put("t1", new SimpleObject("name1"));
             m.put("t2", new SimpleObject("name2"));
@@ -495,7 +495,7 @@ public class RedissonSearchTest extends RedisDockerTest {
                     FieldIndex.text("t2"));
 
             try {
-                Thread.sleep(1000);
+                Thread.sleep(1500);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }

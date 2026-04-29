@@ -762,31 +762,30 @@ public class RedissonExecutorServiceTest extends RedisDockerTest {
 
     @Test
     public void testRepeatedlyExecuteInFixedLateInCluster() {
-        withNewCluster(
-                (node1, redisson) -> {
-                    RScheduledExecutorService es = redisson.getExecutorService("1231231");
+        testInCluster(redisson -> {
+            RScheduledExecutorService es = redisson.getExecutorService("test");
 
-                    es.registerWorkers(WorkerOptions.defaults());
-                    es.scheduleAtFixedRate(new IncrementRunnableTask("fixed_late_int_cluster_test"), 1, 1,
-                            TimeUnit.SECONDS);
+            es.registerWorkers(WorkerOptions.defaults());
+            es.scheduleAtFixedRate(new IncrementRunnableTask("counter"), 1, 1,
+                    TimeUnit.SECONDS);
 
-                    try {
-                        Thread.sleep(3000);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
 
-                    assertThat(redisson.getAtomicLong("fixed_late_int_cluster_test").get()).isGreaterThanOrEqualTo(2);
-                }
-        );
+            assertThat(redisson.getAtomicLong("counter").get()).isGreaterThanOrEqualTo(2);
+            es.shutdown();
+        });
     }
 
     @Test
-    public void testExecutorServiceInCluster() throws Exception {
+    public void testExecutorServiceInCluster() {
         LogCaptor logCaptor = LogCaptor.forClass(CommandDecoder.class);
         logCaptor.setLogLevelToTrace();
 
-        withNewCluster((nodes, redisson) -> {
+        testInCluster(redisson -> {
             try {
                 RExecutorService executor = redisson.getExecutorService("test-cluster-executor");
                 executor.registerWorkers(WorkerOptions.defaults().workers(2));
@@ -821,7 +820,7 @@ public class RedissonExecutorServiceTest extends RedisDockerTest {
         LogCaptor logCaptor = LogCaptor.forClass(CommandDecoder.class);
         logCaptor.setLogLevelToTrace();
 
-        withNewCluster((nodes, redisson) -> {
+        testInCluster(redisson -> {
             try {
                 RScheduledExecutorService executor = redisson.getExecutorService("test-cluster-scheduler");
                 executor.registerWorkers(WorkerOptions.defaults().workers(2));
@@ -853,7 +852,7 @@ public class RedissonExecutorServiceTest extends RedisDockerTest {
         LogCaptor logCaptor = LogCaptor.forClass(CommandDecoder.class);
         logCaptor.setLogLevelToTrace();
 
-        withNewCluster((nodes, redisson) -> {
+        testInCluster(redisson -> {
             try {
                 RExecutorService executor = redisson.getExecutorService("test-cluster-taskcount");
                 executor.registerWorkers(WorkerOptions.defaults().workers(1));
@@ -887,7 +886,7 @@ public class RedissonExecutorServiceTest extends RedisDockerTest {
         LogCaptor logCaptor = LogCaptor.forClass(CommandDecoder.class);
         logCaptor.setLogLevelToTrace();
 
-        withNewCluster((nodes, redisson) -> {
+        testInCluster(redisson -> {
             try {
                 RScheduledExecutorService executor = redisson.getExecutorService("test-cluster-cancel-task");
                 executor.registerWorkers(WorkerOptions.defaults().workers(1));
@@ -915,7 +914,7 @@ public class RedissonExecutorServiceTest extends RedisDockerTest {
         LogCaptor logCaptor = LogCaptor.forClass(CommandDecoder.class);
         logCaptor.setLogLevelToTrace();
 
-        withNewCluster((nodes, redisson) -> {
+        testInCluster(redisson -> {
             try {
                 Config config = redisson.getConfig();
                 config.useClusterServers()
