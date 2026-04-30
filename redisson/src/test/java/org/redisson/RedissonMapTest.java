@@ -11,16 +11,19 @@ import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
 import org.redisson.api.map.MapLoader;
 import org.redisson.api.map.MapWriter;
+import org.redisson.api.listener.MapIncrListener;
 import org.redisson.client.codec.Codec;
 import org.redisson.client.codec.LongCodec;
 import org.redisson.client.codec.StringCodec;
 import org.redisson.config.Config;
 import org.testcontainers.containers.GenericContainer;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,6 +41,51 @@ public class RedissonMapTest extends BaseMapTest {
 
         map.addAndGet(1L, 10L);
         Awaitility.waitAtMost(Durations.TWO_SECONDS).until(() -> storage.get(1L).equals(10L));
+    }
+
+    @Test
+    public void testIncrListener() {
+        testWithParams(redisson -> {
+            Queue<Integer> nfs = new ConcurrentLinkedQueue<>();
+            RMap<String, Double> map = redisson.getMap("testIncrListener");
+
+            int id = map.addListener((MapIncrListener) name -> nfs.add(1));
+
+            map.addAndGet("1", 1D);
+            Awaitility.waitAtMost(Durations.ONE_SECOND).untilAsserted(() -> assertThat(nfs).contains(1));
+
+            nfs.clear();
+            map.removeListener(id);
+            map.addAndGet("1", 1D);
+
+            Awaitility.await()
+                    .during(Duration.ofMillis(500))
+                    .atMost(Duration.ofSeconds(1))
+                    .until(nfs::isEmpty);
+        }, NOTIFY_KEYSPACE_EVENTS, "Eh");
+    }
+
+    @Test
+    public void testIncrListenerAsync() {
+        testWithParams(redisson -> {
+            Queue<Integer> nfs = new ConcurrentLinkedQueue<>();
+            RMap<String, Double> map = redisson.getMap("testIncrListenerAsync");
+
+            int id = map.addListenerAsync((MapIncrListener) name -> nfs.add(1))
+                    .toCompletableFuture().join();
+
+            map.addAndGet("1", 1D);
+            Awaitility.waitAtMost(Durations.ONE_SECOND).untilAsserted(() -> assertThat(nfs).contains(1));
+
+            nfs.clear();
+            map.removeListenerAsync(id).toCompletableFuture().join();
+            map.addAndGet("1", 1D);
+
+            Awaitility.await()
+                    .during(Duration.ofMillis(500))
+                    .atMost(Duration.ofSeconds(1))
+                    .until(nfs::isEmpty);
+        }, NOTIFY_KEYSPACE_EVENTS, "Eh");
     }
 
     protected <K, V> MapWriter<K, V> createMapWriter(Map<K, V> map) {
