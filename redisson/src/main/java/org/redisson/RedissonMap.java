@@ -19,6 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.util.ReferenceCountUtil;
 import org.redisson.api.*;
 import org.redisson.api.MapOptions.WriteMode;
+import org.redisson.api.listener.MapIncrListener;
 import org.redisson.api.listener.MapPutListener;
 import org.redisson.api.listener.MapRemoveListener;
 import org.redisson.api.listener.TrackingListener;
@@ -1886,6 +1887,9 @@ public class RedissonMap<K, V> extends RedissonExpirable implements RMap<K, V> {
         if (listener instanceof MapPutListener) {
             return addListener("__keyevent@*:hset", (MapPutListener) listener, MapPutListener::onPut);
         }
+        if (listener instanceof MapIncrListener) {
+            return addListener("__keyevent@*:hincrbyfloat", (MapIncrListener) listener, MapIncrListener::onIncrement);
+        }
         if (listener instanceof MapRemoveListener) {
             return addListener("__keyevent@*:hdel", (MapRemoveListener) listener, MapRemoveListener::onRemove);
         }
@@ -1901,6 +1905,9 @@ public class RedissonMap<K, V> extends RedissonExpirable implements RMap<K, V> {
         if (listener instanceof MapPutListener) {
             return addListenerAsync("__keyevent@*:hset", (MapPutListener) listener, MapPutListener::onPut);
         }
+        if (listener instanceof MapIncrListener) {
+            return addListenerAsync("__keyevent@*:hincrbyfloat", (MapIncrListener) listener, MapIncrListener::onIncrement);
+        }
         if (listener instanceof MapRemoveListener) {
             return addListenerAsync("__keyevent@*:hdel", (MapRemoveListener) listener, MapRemoveListener::onRemove);
         }
@@ -1914,7 +1921,7 @@ public class RedissonMap<K, V> extends RedissonExpirable implements RMap<K, V> {
     @Override
     public void removeListener(int listenerId) {
         removeTrackingListener(listenerId);
-        removeListener(listenerId, "__keyevent@*:hset", "__keyevent@*:hdel");
+        removeListener(listenerId, "__keyevent@*:hset", "__keyevent@*:hincrbyfloat", "__keyevent@*:hdel");
         super.removeListener(listenerId);
     }
 
