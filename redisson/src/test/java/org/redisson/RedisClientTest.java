@@ -34,7 +34,7 @@ public class RedisClientTest  {
     public static void beforeAll() {
         RedisClientConfig config = new RedisClientConfig();
         config.setProtocol(Protocol.RESP3);
-        config.setAddress("redis://127.0.0.1:" + RedisDockerTest.REDIS.getFirstMappedPort());
+        config.setAddress("redis://127.0.0.1:" + RedisDockerTest.CONTAINER.getFirstMappedPort());
         redisClient = RedisClient.create(config);
     }
 
@@ -65,7 +65,7 @@ public class RedisClientTest  {
         c.sync(new RedisStrictCommand<Void>("ACL"), "SETUSER", "testuser", "on", ">123456", "~*", "allcommands");
         c.close();
 
-        Config config = RedisDockerTest.createConfig(RedisDockerTest.REDIS);
+        Config config = RedisDockerTest.createConfig(RedisDockerTest.CONTAINER);
         config.useSingleServer()
                 .setUsername("testuser")
                 .setPassword("123456");

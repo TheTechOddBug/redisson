@@ -778,7 +778,7 @@ public class RedissonTopicTest extends RedisDockerTest {
 
     @Test
     public void testReattach() throws Exception {
-        GenericContainer<?> redis = createRedis();
+        GenericContainer<?> redis = createContainer();
         redis.start();
 
         Config config = createConfig(redis);
@@ -821,7 +821,7 @@ public class RedissonTopicTest extends RedisDockerTest {
 
     @Test
     public void testAddListenerFailover() throws Exception {
-        GenericContainer<?> redis = createRedis();
+        GenericContainer<?> redis = createContainer();
         redis.start();
 
         Config config = createConfig(redis);
@@ -868,7 +868,7 @@ public class RedissonTopicTest extends RedisDockerTest {
         });
         config.useSingleServer()
                 .setDnsMonitoringInterval(1000)
-                .setAddress("redis://simplehost:" + REDIS.getFirstMappedPort());
+                .setAddress("redis://simplehost:" + CONTAINER.getFirstMappedPort());
         RedissonClient redisson = Redisson.create(config);
 
         RTopic topic = redisson.getTopic("topic");

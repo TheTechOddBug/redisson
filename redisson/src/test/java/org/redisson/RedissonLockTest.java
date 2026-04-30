@@ -180,7 +180,7 @@ public class RedissonLockTest extends BaseConcurrentTest {
 
     @Test
     public void testRedisFailed() {
-        GenericContainer<?> redis = createRedis();
+        GenericContainer<?> redis = createContainer();
         redis.start();
 
         Config config = createConfig(redis);

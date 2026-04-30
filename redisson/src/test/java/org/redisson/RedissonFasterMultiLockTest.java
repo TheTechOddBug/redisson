@@ -15,7 +15,6 @@ import org.testcontainers.containers.GenericContainer;
 
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.*;
@@ -321,7 +320,7 @@ public class RedissonFasterMultiLockTest extends BaseConcurrentTest {
 
     @Test
     public void testRedisFailed() {
-        GenericContainer<?> redis = createRedis();
+        GenericContainer<?> redis = createContainer();
         redis.start();
 
         Config config = createConfig(redis);

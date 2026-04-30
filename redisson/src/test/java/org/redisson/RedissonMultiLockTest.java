@@ -95,9 +95,9 @@ public class RedissonMultiLockTest extends RedisDockerTest {
     
     @Test
     public void test() throws IOException, InterruptedException {
-        GenericContainer<?> redis1 = createRedis();
-        GenericContainer<?> redis2 = createRedis();
-        GenericContainer<?> redis3 = createRedis();
+        GenericContainer<?> redis1 = createContainer();
+        GenericContainer<?> redis2 = createContainer();
+        GenericContainer<?> redis3 = createContainer();
 
         redis1.start();
         redis2.start();

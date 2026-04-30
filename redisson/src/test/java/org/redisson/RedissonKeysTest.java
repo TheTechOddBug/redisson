@@ -470,7 +470,7 @@ public class RedissonKeysTest extends RedisDockerTest {
     @Test
     public void testMigrate(){
         String password = "123456";
-        GenericContainer<?> redis = createRedis("--requirepass " + password);
+        GenericContainer<?> redis = createContainer("--requirepass " + password);
         redis.start();
         Config config = createConfigWithPassword(redis, password);
         RedissonClient r2 = Redisson.create(config);

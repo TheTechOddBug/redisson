@@ -36,14 +36,14 @@ public class JCacheTest extends RedisDockerTest {
 
     @BeforeAll
     public static void before() throws IOException, InterruptedException {
-        org.testcontainers.containers.Container.ExecResult r = REDIS.execInContainer("redis-cli", "CONFIG", "SET", "notify-keyspace-events", "Ehx");
+        org.testcontainers.containers.Container.ExecResult r = CONTAINER.execInContainer("redis-cli", "CONFIG", "SET", "notify-keyspace-events", "Ehx");
         assertThat(r.getExitCode()).isEqualTo(0);
-        System.setProperty("port", REDIS.getFirstMappedPort().toString());
+        System.setProperty("port", CONTAINER.getFirstMappedPort().toString());
     }
 
     @AfterAll
     public static void after() throws IOException, InterruptedException {
-        org.testcontainers.containers.Container.ExecResult r = REDIS.execInContainer("redis-cli", "CONFIG", "SET", "notify-keyspace-events", "");
+        org.testcontainers.containers.Container.ExecResult r = CONTAINER.execInContainer("redis-cli", "CONFIG", "SET", "notify-keyspace-events", "");
         assertThat(r.getExitCode()).isEqualTo(0);
     }
 

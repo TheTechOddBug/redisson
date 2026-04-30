@@ -12,7 +12,6 @@ import org.redisson.config.Config;
 import org.testcontainers.containers.ContainerState;
 import org.testcontainers.containers.GenericContainer;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -41,7 +40,7 @@ public class RedissonBlockingQueueTest extends RedissonQueueTest {
     
     @Test
     public void testPollWithBrokenConnection() throws InterruptedException, ExecutionException {
-        GenericContainer<?> redis = createRedis();
+        GenericContainer<?> redis = createContainer();
         redis.start();
 
         Config config = createConfig(redis);
@@ -71,7 +70,7 @@ public class RedissonBlockingQueueTest extends RedissonQueueTest {
     
     @Test
     public void testPollReattach() throws InterruptedException {
-        GenericContainer<?> redis = createRedis("--requirepass", "1234");
+        GenericContainer<?> redis = createContainer("--requirepass", "1234");
         redis.start();
 
         Config config = createConfig(redis);
@@ -116,7 +115,7 @@ public class RedissonBlockingQueueTest extends RedissonQueueTest {
     
     @Test
     public void testPollAsyncReattach() throws InterruptedException, ExecutionException, TimeoutException {
-        GenericContainer<?> redis = createRedis();
+        GenericContainer<?> redis = createContainer();
         redis.start();
 
         Config config = createConfig(redis);
@@ -249,7 +248,7 @@ public class RedissonBlockingQueueTest extends RedissonQueueTest {
 
     @Test
     public void testTakeReattach() throws Exception {
-        GenericContainer<?> redis = createRedis();
+        GenericContainer<?> redis = createContainer();
         redis.start();
 
         Config config = createConfig(redis);

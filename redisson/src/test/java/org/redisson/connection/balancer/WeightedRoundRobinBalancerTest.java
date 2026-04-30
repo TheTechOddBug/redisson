@@ -2,7 +2,6 @@ package org.redisson.connection.balancer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,9 +23,9 @@ public class WeightedRoundRobinBalancerTest extends RedisDockerTest {
             GenericContainer<?> slave = null;
             RedissonClient client = null;
             try {
-                master = createRedis();
+                master = createContainer();
                 master.start();
-                slave = createRedis();
+                slave = createContainer();
                 slave.start();
 
                 String masterurl = "redis://" + master.getHost() + ":" + master.getFirstMappedPort();

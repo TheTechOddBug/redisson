@@ -403,7 +403,7 @@ public class RedissonMapTest extends BaseMapTest {
 
     @Test
     public void testAsyncIteratorException() {
-        GenericContainer<?> redis = createRedis();
+        GenericContainer<?> redis = createContainer();
         redis.start();
 
         Config config = createConfig(redis);

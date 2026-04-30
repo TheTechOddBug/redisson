@@ -34,7 +34,7 @@ public class RedisDockerTest {
 
     protected static final String MAXMEMORY_POLICY = "--maxmemory-policy";
 
-    protected static final GenericContainer<?> REDIS = createRedis();
+    protected static final GenericContainer<?> CONTAINER = createContainer();
 
     protected static final Protocol protocol = Protocol.RESP2;
 
@@ -42,10 +42,10 @@ public class RedisDockerTest {
 
     protected static RedissonClient redissonCluster;
 
-    private static Startable REDIS_CLUSTER;
+    private static Startable CONTAINER_CLUSTER;
 
-    protected static GenericContainer<?> createRedisWithVersion(String version, String... params) {
-        return new GenericContainer<>(version)
+    protected static GenericContainer<?> createContainerByImage(String imageName, String... params) {
+        return new GenericContainer<>(imageName)
                 .withCreateContainerCmdModifier(cmd -> {
                     if (params.length > 0) {
                         List<String> args = new ArrayList<>();
@@ -58,32 +58,32 @@ public class RedisDockerTest {
                 .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("redis")));
     }
 
-    protected static GenericContainer<?> createRedis(String... params) {
-        return createRedisWithVersion(IMAGE, params);
+    protected static GenericContainer<?> createContainer(String... params) {
+        return createContainerByImage(IMAGE, params);
 //        return createRedisWithVersion("valkey/valkey-bundle:latest", params);
     }
 
     static {
-        REDIS.start();
+        CONTAINER.start();
         Config config = createConfig();
         redisson = Redisson.create(config);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             redisson.shutdown();
-            REDIS.stop();
+            CONTAINER.stop();
             if (redissonCluster != null) {
                 redissonCluster.shutdown();
                 redissonCluster = null;
             }
-            if (REDIS_CLUSTER != null) {
-                REDIS_CLUSTER.stop();
-                REDIS_CLUSTER = null;
+            if (CONTAINER_CLUSTER != null) {
+                CONTAINER_CLUSTER.stop();
+                CONTAINER_CLUSTER = null;
             }
         }));
     }
 
     protected static Config createConfig() {
-        return createConfig(REDIS);
+        return createConfig(CONTAINER);
     }
 
     protected static Config createConfig(GenericContainer<?> container) {
@@ -114,7 +114,7 @@ public class RedisDockerTest {
     }
 
     protected void testWithParams(Consumer<RedissonClient> redissonCallback, String... params) {
-        GenericContainer<?> redis = createRedis(params);
+        GenericContainer<?> redis = createContainer(params);
         redis.start();
 
         Config config = createConfig(redis);
@@ -131,7 +131,7 @@ public class RedisDockerTest {
     protected static void testInCluster(Consumer<RedissonClient> redissonCallback) {
         if (redissonCluster == null) {
             ClusterData data = createCluster();
-            REDIS_CLUSTER = data.container;
+            CONTAINER_CLUSTER = data.container;
             redissonCluster = data.redisson;
         }
 
@@ -147,7 +147,7 @@ public class RedisDockerTest {
     }
 
     protected static final String MASTER_NAME = "mymaster";
-    protected static final int REDIS_PORT = 6379;
+    protected static final int CONTAINER_PORT = 6379;
     protected static final int SENTINEL_PORT = 26379;
 
     protected void withSentinel(BiConsumer<List<GenericContainer<?>>, Config> callback, int slaves) throws InterruptedException {
@@ -269,7 +269,7 @@ public class RedisDockerTest {
         GenericContainer<?> container = new GenericContainer<>(DockerImageName.parse(IMAGE))
                 .withNetwork(network)
                 .withNetworkAliases("redis-master")
-                .withExposedPorts(REDIS_PORT)
+                .withExposedPorts(CONTAINER_PORT)
                 .withCommand(cmd.toArray(new String[0]))
                 .waitingFor(Wait.forLogMessage(".*Ready to accept connections.*", 1))
                 .withStartupTimeout(Duration.ofSeconds(30));
@@ -296,7 +296,7 @@ public class RedisDockerTest {
         cmd.add("no");
         cmd.add("--replicaof");
         cmd.add(masterIp);
-        cmd.add(String.valueOf(REDIS_PORT));
+        cmd.add(String.valueOf(CONTAINER_PORT));
 
         if (password != null && !password.isEmpty()) {
             cmd.add("--requirepass");
@@ -308,7 +308,7 @@ public class RedisDockerTest {
         return new GenericContainer<>(DockerImageName.parse(IMAGE))
                 .withNetwork(network)
                 .withNetworkAliases(hostname)
-                .withExposedPorts(REDIS_PORT)
+                .withExposedPorts(CONTAINER_PORT)
                 .withCommand(cmd.toArray(new String[0]))
                 .waitingFor(Wait.forLogMessage(".*Ready to accept connections.*", 1))
                 .withStartupTimeout(Duration.ofSeconds(60));
@@ -322,7 +322,7 @@ public class RedisDockerTest {
         lines.add("bind 0.0.0.0");
         lines.add("protected-mode no");
         // Use IP for master monitoring - more reliable for failover
-        lines.add("sentinel monitor " + MASTER_NAME + " " + masterIp + " " + REDIS_PORT + " " + quorum);
+        lines.add("sentinel monitor " + MASTER_NAME + " " + masterIp + " " + CONTAINER_PORT + " " + quorum);
         // Very fast detection for test environment
         lines.add("sentinel down-after-milliseconds " + MASTER_NAME + " 3000");
         lines.add("sentinel failover-timeout " + MASTER_NAME + " 5000");

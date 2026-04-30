@@ -26,7 +26,7 @@ public class RedissonLockExpirationRenewalTest extends RedisDockerTest {
 
     @BeforeEach
     public void beforeEachTest() {
-        redis = createRedis();
+        redis = createContainer();
         redis.start();
 
         Config c = createConfig(redis);

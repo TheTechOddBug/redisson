@@ -73,7 +73,7 @@ public class RedissonPriorityBlockingQueueTest extends RedissonBlockingQueueTest
     
     @Test
     public void testPollAsyncReattach() throws InterruptedException, ExecutionException {
-        GenericContainer<?> redis = createRedis();
+        GenericContainer<?> redis = createContainer();
         redis.start();
 
         Config config = createConfig(redis);
@@ -106,7 +106,7 @@ public class RedissonPriorityBlockingQueueTest extends RedissonBlockingQueueTest
     
     @Test
     public void testTakeReattach() throws Exception {
-        GenericContainer<?> redis = createRedis();
+        GenericContainer<?> redis = createContainer();
         redis.start();
 
         Config config = createConfig(redis);

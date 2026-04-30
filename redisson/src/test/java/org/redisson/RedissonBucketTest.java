@@ -619,12 +619,12 @@ public class RedissonBucketTest extends RedisDockerTest {
     private void testTwoInstances(BiConsumer<RedissonClient, RedissonClient> consumer) {
         Network network = Network.newNetwork();
 
-        GenericContainer<?> redis = createRedis()
+        GenericContainer<?> redis = createContainer()
                                         .withNetwork(network)
                                         .withNetworkAliases("foo1");
         redis.start();
 
-        GenericContainer<?> redis2 = createRedis()
+        GenericContainer<?> redis2 = createContainer()
                                         .withNetwork(network)
                                         .withNetworkAliases("foo2");
         redis2.start();
@@ -646,7 +646,7 @@ public class RedissonBucketTest extends RedisDockerTest {
 
     @Test
     public void testFailoverTimeout() {
-        GenericContainer<?> redis = createRedis();
+        GenericContainer<?> redis = createContainer();
         redis.start();
 
         Config config = createConfig(redis);

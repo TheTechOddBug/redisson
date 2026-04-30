@@ -245,7 +245,7 @@ public class RedissonBoundedBlockingQueueTest extends RedisDockerTest {
     
     @Test
     public void testPollWithBrokenConnection() throws InterruptedException, ExecutionException {
-        GenericContainer<?> redis = createRedis();
+        GenericContainer<?> redis = createContainer();
         redis.start();
 
         Config config = createConfig(redis);
@@ -272,7 +272,7 @@ public class RedissonBoundedBlockingQueueTest extends RedisDockerTest {
     
     @Test
     public void testPollReattach() throws InterruptedException {
-        GenericContainer<?> redis = createRedis();
+        GenericContainer<?> redis = createContainer();
         redis.start();
 
         Config config = createConfig(redis);
@@ -318,7 +318,7 @@ public class RedissonBoundedBlockingQueueTest extends RedisDockerTest {
     
     @Test
     public void testPollAsyncReattach() throws InterruptedException, ExecutionException, TimeoutException {
-        GenericContainer<?> redis = createRedis();
+        GenericContainer<?> redis = createContainer();
         redis.start();
 
         Config config = createConfig(redis);
@@ -353,7 +353,7 @@ public class RedissonBoundedBlockingQueueTest extends RedisDockerTest {
     
     @Test
     public void testTakeReattach() throws InterruptedException, ExecutionException, TimeoutException {
-        GenericContainer<?> redis = createRedis();
+        GenericContainer<?> redis = createContainer();
         redis.start();
 
         Config config = createConfig(redis);

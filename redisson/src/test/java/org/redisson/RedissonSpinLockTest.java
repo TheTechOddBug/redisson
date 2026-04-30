@@ -7,7 +7,6 @@ import org.redisson.api.RFuture;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.redisson.client.RedisException;
-import org.redisson.client.WriteRedisConnectionException;
 import org.redisson.config.Config;
 import org.testcontainers.containers.GenericContainer;
 
@@ -57,7 +56,7 @@ public class RedissonSpinLockTest extends BaseConcurrentTest {
 
     @Test
     public void testRedisFailed() {
-        GenericContainer<?> redis = createRedis();
+        GenericContainer<?> redis = createContainer();
         redis.start();
 
         Config config = createConfig(redis);

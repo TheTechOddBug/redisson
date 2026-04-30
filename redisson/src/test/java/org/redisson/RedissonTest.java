@@ -56,7 +56,7 @@ public class RedissonTest extends RedisDockerTest {
 
     @Test
     public void testValkeyCapabilities() {
-        GenericContainer<?> redis = createRedisWithVersion("valkey/valkey:latest");
+        GenericContainer<?> redis = createContainerByImage("valkey/valkey:latest");
         redis.start();
 
         Config config = createConfig(redis);
@@ -423,7 +423,7 @@ public class RedissonTest extends RedisDockerTest {
     
     @Test
     public void testConnectionListener() {
-        GenericContainer<?> redis = createRedis();
+        GenericContainer<?> redis = createContainer();
         redis.start();
 
         final AtomicInteger connectCounter = new AtomicInteger();
@@ -583,7 +583,7 @@ public class RedissonTest extends RedisDockerTest {
         r.getBucket("myBucket").set(1);
         assertThat(r.getBucket("myBucket").get()).isEqualTo(1);
 
-        REDIS.getDockerClient().pauseContainerCmd(REDIS.getContainerId()).exec();
+        CONTAINER.getDockerClient().pauseContainerCmd(CONTAINER.getContainerId()).exec();
 
         AtomicBoolean hasError = new AtomicBoolean();
         try {
@@ -595,7 +595,7 @@ public class RedissonTest extends RedisDockerTest {
 
         assertThat(hasError.get()).isTrue();
 
-        REDIS.getDockerClient().unpauseContainerCmd(REDIS.getContainerId()).exec();
+        CONTAINER.getDockerClient().unpauseContainerCmd(CONTAINER.getContainerId()).exec();
 
         assertThat(r.getBucket("myBucket").get()).isEqualTo(1);
 
@@ -631,7 +631,7 @@ public class RedissonTest extends RedisDockerTest {
 
     @Test
     public void testCredentials() {
-        GenericContainer<?> redis = createRedis("--requirepass", "1234");
+        GenericContainer<?> redis = createContainer("--requirepass", "1234");
         redis.start();
 
         Config config = createConfig(redis);
@@ -677,7 +677,7 @@ public class RedissonTest extends RedisDockerTest {
 
     @Test
     public void testCredentialsReapplyInterval() throws InterruptedException {
-        GenericContainer<?> redis = createRedis("--requirepass", "1234");
+        GenericContainer<?> redis = createContainer("--requirepass", "1234");
         redis.start();
 
         CountDownLatch latch = new CountDownLatch(8);
@@ -789,7 +789,7 @@ public class RedissonTest extends RedisDockerTest {
 
     @Test
     public void testURIPassword() {
-        GenericContainer<?> redis = createRedis("--requirepass", "1234");
+        GenericContainer<?> redis = createContainer("--requirepass", "1234");
         redis.start();
 
         Config config = createConfig(redis);
@@ -856,9 +856,9 @@ public class RedissonTest extends RedisDockerTest {
             }
         });
         c2.useMasterSlaveServers()
-                .setMasterAddress("redis://masterhost:" + REDIS.getFirstMappedPort())
-                .addSlaveAddress("redis://slavehost1:" + REDIS.getFirstMappedPort(),
-                                            "redis://slavehost2:" + REDIS.getFirstMappedPort());
+                .setMasterAddress("redis://masterhost:" + CONTAINER.getFirstMappedPort())
+                .addSlaveAddress("redis://slavehost1:" + CONTAINER.getFirstMappedPort(),
+                                            "redis://slavehost2:" + CONTAINER.getFirstMappedPort());
 
         RedissonClient cc = Redisson.create(c2);
         RBucket<String> b = cc.getBucket("test");
@@ -1177,7 +1177,7 @@ public class RedissonTest extends RedisDockerTest {
         });
         config.useSingleServer()
                 .setDnsMonitoringInterval(1000)
-                .setAddress("redis://localhost:" + REDIS.getFirstMappedPort());
+                .setAddress("redis://localhost:" + CONTAINER.getFirstMappedPort());
         RedissonClient redisson = Redisson.create(config);
 
         RedisURI addr = new RedisURI(redisson.getConfig().useSingleServer().getAddress());

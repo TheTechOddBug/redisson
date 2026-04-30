@@ -63,7 +63,7 @@ public class EntraIdCredentialsTest extends RedisDockerTest {
 
     @Test
     public void testReauthOnSubscribedConnection() throws Exception {
-        GenericContainer<?> redis = createRedis("--requirepass", "1234");
+        GenericContainer<?> redis = createContainer("--requirepass", "1234");
         redis.start();
 
         TokenManagerConfig cfg = new TokenManagerConfig(0, 0, 0,
