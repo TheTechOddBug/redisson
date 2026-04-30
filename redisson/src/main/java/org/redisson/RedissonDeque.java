@@ -27,8 +27,10 @@ import org.redisson.client.protocol.RedisCommand;
 import org.redisson.client.protocol.RedisCommands;
 import org.redisson.client.protocol.decoder.ListFirstObjectDecoder;
 import org.redisson.command.CommandAsyncExecutor;
+import org.redisson.misc.CompletableFutureWrapper;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Distributed and concurrent implementation of {@link java.util.Queue}
@@ -76,10 +78,7 @@ public class RedissonDeque<V> extends RedissonQueue<V> implements RDeque<V> {
 
     @Override
     public RFuture<Void> removeListenerAsync(int listenerId) {
-        RFuture<Void> f1 = removeListenerAsync(listenerId, "__keyevent@*:lpush");
-        RFuture<Void> f2 = super.removeListenerAsync(listenerId);
-        return new org.redisson.misc.CompletableFutureWrapper<>(
-                java.util.concurrent.CompletableFuture.allOf(f1.toCompletableFuture(), f2.toCompletableFuture()));
+        return removeListenerAsync(super.removeListenerAsync(listenerId), listenerId, "__keyevent@*:lpush");
     }
 
     @Override
