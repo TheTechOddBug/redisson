@@ -182,15 +182,14 @@ public class RedissonLock extends RedissonBaseLock {
     }
 
     private RFuture<Long> tryAcquireAsync(long waitTime, long leaseTime, TimeUnit unit, long threadId) {
-        RFuture<Long> ttlRemainingFuture;
+        CompletionStage<Long> ttlRemainingFuture;
         if (leaseTime > 0) {
             ttlRemainingFuture = tryLockInnerAsync(waitTime, leaseTime, unit, threadId, RedisCommands.EVAL_LONG);
         } else {
             ttlRemainingFuture = tryLockInnerAsync(waitTime, internalLockLeaseTime,
                     TimeUnit.MILLISECONDS, threadId, RedisCommands.EVAL_LONG);
         }
-        CompletionStage<Long> s = handleNoSync(threadId, ttlRemainingFuture);
-        ttlRemainingFuture = new CompletableFutureWrapper<>(s);
+        ttlRemainingFuture = handleNoSync(threadId, ttlRemainingFuture);
 
         CompletionStage<Long> f = ttlRemainingFuture.thenApply(ttlRemaining -> {
             // lock acquired
