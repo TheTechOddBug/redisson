@@ -133,6 +133,20 @@ public final class RedissonReactive implements RedissonReactiveClient {
     }
 
     @Override
+    public RLockReactive getNonReentrantFairLock(String name) {
+        return ReactiveProxyBuilder.create(commandExecutor,
+                new RedissonNonReentrantFairLock(commandExecutor, name), RLockReactive.class);
+    }
+
+    @Override
+    public RLockReactive getNonReentrantFairLock(CommonOptions options) {
+        CommonParams params = (CommonParams) options;
+        CommandReactiveExecutor ca = commandExecutor.copy(params);
+        return ReactiveProxyBuilder.create(commandExecutor,
+                new RedissonNonReentrantFairLock(ca, params.getName()), RLockReactive.class);
+    }
+
+    @Override
     public RRateLimiterReactive getRateLimiter(String name) {
         return ReactiveProxyBuilder.create(commandExecutor, new RedissonRateLimiter(commandExecutor, name), RRateLimiterReactive.class);
     }

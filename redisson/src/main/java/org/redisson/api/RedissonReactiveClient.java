@@ -267,6 +267,32 @@ public interface RedissonReactiveClient {
     RLockReactive getFairLock(CommonOptions options);
 
     /**
+     * Returns a fair, non-reentrant Lock instance by name.
+     * <p>
+     * Acquisition order is FIFO across all Redisson instances. Unlike
+     * {@link #getFairLock(String)}, attempts by the same thread to acquire
+     * the lock while it already holds it cause {@link IllegalMonitorStateException}
+     * for both {@code lock()} and {@code tryLock()}.
+     *
+     * @param name name of object
+     * @return Lock object
+     */
+    RLockReactive getNonReentrantFairLock(String name);
+
+    /**
+     * Returns a fair, non-reentrant Lock instance with specified <code>options</code>.
+     * <p>
+     * Acquisition order is FIFO across all Redisson instances. Unlike
+     * {@link #getFairLock(CommonOptions)}, attempts by the same thread to acquire
+     * the lock while it already holds it cause {@link IllegalMonitorStateException}
+     * for both {@code lock()} and {@code tryLock()}.
+     *
+     * @param options instance options
+     * @return Lock object
+     */
+    RLockReactive getNonReentrantFairLock(CommonOptions options);
+
+    /**
      * Returns Lock instance by name.
      * <p>
      * Implements a <b>non-fair</b> locking so doesn't guarantees an acquire order by threads.

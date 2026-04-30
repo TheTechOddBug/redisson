@@ -1022,7 +1022,37 @@ public interface RedissonClient {
      * @return Lock object
      */
     RLock getFairLock(CommonOptions options);
-    
+
+    /**
+     * Returns a fair, non-reentrant Lock instance by name.
+     * <p>
+     * Acquisition order is FIFO across all Redisson instances. Unlike
+     * {@link #getFairLock(String)}, attempts by the same thread to acquire
+     * the lock while it already holds it cause {@link IllegalMonitorStateException}
+     * for both {@code lock()} and {@code tryLock()}.
+     * <p>
+     * To increase reliability during failover, all operations wait for propagation to all Redis slaves.
+     *
+     * @param name name of object
+     * @return Lock object
+     */
+    RLock getNonReentrantFairLock(String name);
+
+    /**
+     * Returns a fair, non-reentrant Lock instance with specified <code>options</code>.
+     * <p>
+     * Acquisition order is FIFO across all Redisson instances. Unlike
+     * {@link #getFairLock(CommonOptions)}, attempts by the same thread to acquire
+     * the lock while it already holds it cause {@link IllegalMonitorStateException}
+     * for both {@code lock()} and {@code tryLock()}.
+     * <p>
+     * To increase reliability during failover, all operations wait for propagation to all Redis slaves.
+     *
+     * @param options instance options
+     * @return Lock object
+     */
+    RLock getNonReentrantFairLock(CommonOptions options);
+
     /**
      * Returns ReadWriteLock instance by name.
      * <p>

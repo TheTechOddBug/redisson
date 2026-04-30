@@ -132,6 +132,19 @@ public final class RedissonRx implements RedissonRxClient {
     }
 
     @Override
+    public RLockRx getNonReentrantFairLock(String name) {
+        return RxProxyBuilder.create(commandExecutor,
+                new RedissonNonReentrantFairLock(commandExecutor, name), RLockRx.class);
+    }
+
+    @Override
+    public RLockRx getNonReentrantFairLock(CommonOptions options) {
+        CommonParams params = (CommonParams) options;
+        return RxProxyBuilder.create(commandExecutor,
+                new RedissonNonReentrantFairLock(commandExecutor.copy(params), params.getName()), RLockRx.class);
+    }
+
+    @Override
     public RRateLimiterRx getRateLimiter(String name) {
         return RxProxyBuilder.create(commandExecutor, new RedissonRateLimiter(commandExecutor, name), RRateLimiterRx.class);
     }

@@ -671,6 +671,17 @@ public final class Redisson implements RedissonClient {
     }
 
     @Override
+    public RLock getNonReentrantFairLock(String name) {
+        return new RedissonNonReentrantFairLock(commandExecutor, name);
+    }
+
+    @Override
+    public RLock getNonReentrantFairLock(CommonOptions options) {
+        CommonParams params = (CommonParams) options;
+        return new RedissonNonReentrantFairLock(commandExecutor.copy(params), params.getName());
+    }
+
+    @Override
     public RReadWriteLock getReadWriteLock(String name) {
         return new RedissonReadWriteLock(commandExecutor, name);
     }
