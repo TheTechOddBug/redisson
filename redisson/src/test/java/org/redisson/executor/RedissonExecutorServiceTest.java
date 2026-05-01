@@ -299,12 +299,9 @@ public class RedissonExecutorServiceTest extends RedisDockerTest {
     public void testTaskStarted() throws InterruptedException {
         RExecutorService executor = redisson.getExecutorService("test1");
         CountDownLatch l = new CountDownLatch(1);
-        executor.registerWorkers(WorkerOptions.defaults().addListener(new TaskStartedListener() {
-            @Override
-            public void onStarted(String taskId) {
-                assertThat(taskId).isNotEmpty();
-                l.countDown();
-            }
+        executor.registerWorkers(WorkerOptions.defaults().addListener((TaskStartedListener) taskId -> {
+            assertThat(taskId).isNotEmpty();
+            l.countDown();
         }));
 
         RExecutorFuture<?> future = executor.submit(new RunnableTask());
@@ -318,12 +315,9 @@ public class RedissonExecutorServiceTest extends RedisDockerTest {
     public void testTaskFinished() throws InterruptedException {
         RExecutorService executor = redisson.getExecutorService("test1");
         CountDownLatch l = new CountDownLatch(1);
-        executor.registerWorkers(WorkerOptions.defaults().addListener(new TaskFinishedListener() {
-            @Override
-            public void onFinished(String taskId) {
-                assertThat(taskId).isNotEmpty();
-                l.countDown();
-            }
+        executor.registerWorkers(WorkerOptions.defaults().addListener((TaskFinishedListener) taskId -> {
+            assertThat(taskId).isNotEmpty();
+            l.countDown();
         }));
 
         RExecutorFuture<?> future = executor.submit(new RunnableTask());
@@ -639,7 +633,7 @@ public class RedissonExecutorServiceTest extends RedisDockerTest {
             });
         });
     }
-    
+
     @Test
     public void testAnonymousCallable() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
@@ -651,7 +645,7 @@ public class RedissonExecutorServiceTest extends RedisDockerTest {
             });
         });
     }
-    
+
     public class TaskCallableClass implements Callable<String> {
 
         @Override
@@ -730,12 +724,7 @@ public class RedissonExecutorServiceTest extends RedisDockerTest {
 
         AtomicInteger counter = new AtomicInteger();
 
-        topic.addListener(Long.class, new MessageListener<Long>() {
-            @Override
-            public void onMessage(CharSequence channel, Long msg) {
-                counter.incrementAndGet();
-            }
-        });
+        topic.addListener(Long.class, (channel, msg) -> counter.incrementAndGet());
 
         test.submitAsync(new DelayedTask(10000, "test-counter"));
         Thread.sleep(2000);
