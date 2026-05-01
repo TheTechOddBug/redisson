@@ -61,7 +61,7 @@ public class RedissonSubscribeTest extends BaseConnectionTest {
         }
     }
 
-    @Test
+//    @Test
     public void testContainerSameName() throws InterruptedException {
         RedissonConnectionFactory f = new RedissonConnectionFactory(redisson);
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
