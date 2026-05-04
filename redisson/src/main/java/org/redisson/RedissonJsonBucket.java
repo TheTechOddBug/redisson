@@ -838,12 +838,7 @@ public class RedissonJsonBucket<V> extends RedissonExpirable implements RJsonBuc
 
     @Override
     public RFuture<List<String>> getKeysAsync() {
-        RedisCommand command = RedisCommands.JSON_OBJKEYS;
-        if (getServiceManager().isResp3()) {
-            command = new RedisCommand("JSON.OBJKEYS",
-                    new ListMultiDecoder2(new ListFirstObjectDecoder(), new StringListListReplayDecoder()));
-        }
-        return commandExecutor.readAsync(getRawName(), LongCodec.INSTANCE, command, getRawName());
+        return commandExecutor.readAsync(getRawName(), LongCodec.INSTANCE, RedisCommands.JSON_OBJKEYS, getRawName());
     }
 
     @Override
