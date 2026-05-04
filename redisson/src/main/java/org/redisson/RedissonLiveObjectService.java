@@ -32,13 +32,7 @@ import org.redisson.api.*;
 import org.redisson.api.annotation.*;
 import org.redisson.api.condition.Condition;
 import org.redisson.client.codec.StringCodec;
-import org.redisson.client.protocol.RedisCommand;
 import org.redisson.client.protocol.RedisCommands;
-import org.redisson.client.protocol.convertor.Convertor;
-import org.redisson.client.protocol.decoder.ListMultiDecoder2;
-import org.redisson.client.protocol.decoder.ListScanResult;
-import org.redisson.client.protocol.decoder.ListScanResultReplayDecoder;
-import org.redisson.client.protocol.decoder.ObjectListReplayDecoder;
 import org.redisson.command.CommandAsyncExecutor;
 import org.redisson.command.CommandBatchService;
 import org.redisson.liveobject.LiveObjectSearch;
@@ -759,21 +753,11 @@ public class RedissonLiveObjectService implements RLiveObjectService {
         NamingScheme namingScheme = commandExecutor.getObjectBuilder().getNamingScheme(entityClass);
         String pattern = namingScheme.getNamePattern(entityClass);
         RedissonKeys keys = new RedissonKeys(commandExecutor);
-
-        RedisCommand<ListScanResult<String>> command = new RedisCommand<>("SCAN",
-                new ListMultiDecoder2(new ListScanResultReplayDecoder(), new ObjectListReplayDecoder<Object>()), new Convertor<Object>() {
-            int index;
-            @Override
-            public Object convert(Object obj) {
-                index++;
-                if (index == 1) {
-                    return obj;
-                }
-                return namingScheme.resolveId(obj.toString());
-            }
-        });
-
-        return keys.getKeysByPattern(command, pattern, 0, count, null);
+        List<K> result = new ArrayList<>();
+        for (String name : keys.getKeysByPattern(pattern, count)) {
+            result.add((K) namingScheme.resolveId(name));
+        }
+        return result;
     }
 
     @Override

@@ -1540,6 +1540,24 @@ public class RedissonLiveObjectServiceTest extends RedisDockerTest {
     }
 
     @Test
+    public void testFindIdsPagination() {
+        RLiveObjectService s = redisson.getLiveObjectService();
+        int count = 25;
+        List<TestIndexed1> entities = new ArrayList<>();
+        List<String> expectedIds = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            TestIndexed1 t = new TestIndexed1();
+            t.setId("pg-" + i);
+            entities.add(t);
+            expectedIds.add("pg-" + i);
+        }
+        s.persist(entities.toArray(new TestIndexed1[0]));
+
+        Iterable<String> ids = s.findIds(TestIndexed1.class);
+        assertThat(ids).containsExactlyInAnyOrderElementsOf(expectedIds);
+    }
+
+    @Test
     public void testMergeList2() {
         RLiveObjectService s = redisson.getLiveObjectService();
         TestIndexed1 t1 = new TestIndexed1();
