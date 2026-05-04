@@ -72,11 +72,12 @@ public class ReadLockTask extends LockTask {
             keysArgs.add(key);
             keysArgs.add(keyPrefix);
 
-            List<String> lockNames = new ArrayList<>(entry.threadId2lockName.values());
+            Map<Long, String> snapshot = new LinkedHashMap<>(entry.threadId2lockName);
+            List<String> lockNames = new ArrayList<>(snapshot.values());
             args.add(lockNames.size());
             args.addAll(lockNames);
 
-            List<Long> threadIds = new ArrayList<>(entry.threadId2lockName.keySet());
+            List<Long> threadIds = new ArrayList<>(snapshot.keySet());
             name2threadIds.put(key, threadIds);
         }
 
