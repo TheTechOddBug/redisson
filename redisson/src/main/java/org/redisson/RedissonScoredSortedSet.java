@@ -17,6 +17,7 @@ package org.redisson;
 
 import org.redisson.api.*;
 import org.redisson.api.listener.ScoredSortedSetAddListener;
+import org.redisson.api.listener.ScoredSortedSetDiffStoreListener;
 import org.redisson.api.listener.ScoredSortedSetIncrListener;
 import org.redisson.api.listener.ScoredSortedSetInterStoreListener;
 import org.redisson.api.listener.ScoredSortedSetRemoveListener;
@@ -2220,6 +2221,9 @@ public class RedissonScoredSortedSet<V> extends RedissonExpirable implements RSc
         if (listener instanceof ScoredSortedSetInterStoreListener) {
             return addListener("__keyevent@*:zinterstore", (ScoredSortedSetInterStoreListener) listener, ScoredSortedSetInterStoreListener::onStore);
         }
+        if (listener instanceof ScoredSortedSetDiffStoreListener) {
+            return addListener("__keyevent@*:zdiffstore", (ScoredSortedSetDiffStoreListener) listener, ScoredSortedSetDiffStoreListener::onStore);
+        }
         if (listener instanceof TrackingListener) {
             return addTrackingListener((TrackingListener) listener);
         }
@@ -2244,6 +2248,9 @@ public class RedissonScoredSortedSet<V> extends RedissonExpirable implements RSc
         if (listener instanceof ScoredSortedSetInterStoreListener) {
             return addListenerAsync("__keyevent@*:zinterstore", (ScoredSortedSetInterStoreListener) listener, ScoredSortedSetInterStoreListener::onStore);
         }
+        if (listener instanceof ScoredSortedSetDiffStoreListener) {
+            return addListenerAsync("__keyevent@*:zdiffstore", (ScoredSortedSetDiffStoreListener) listener, ScoredSortedSetDiffStoreListener::onStore);
+        }
         if (listener instanceof TrackingListener) {
             return addTrackingListenerAsync((TrackingListener) listener);
         }
@@ -2254,14 +2261,14 @@ public class RedissonScoredSortedSet<V> extends RedissonExpirable implements RSc
     @Override
     public void removeListener(int listenerId) {
         removeTrackingListener(listenerId);
-        removeListener(listenerId, "__keyevent@*:zadd", "__keyevent@*:zrem", "__keyevent@*:zincr", "__keyevent@*:zunionstore", "__keyevent@*:zinterstore");
+        removeListener(listenerId, "__keyevent@*:zadd", "__keyevent@*:zrem", "__keyevent@*:zincr", "__keyevent@*:zunionstore", "__keyevent@*:zinterstore", "__keyevent@*:zdiffstore");
         super.removeListener(listenerId);
     }
 
     @Override
     public RFuture<Void> removeListenerAsync(int listenerId) {
         return removeListenerAsync(removeTrackingListenerAsync(listenerId), listenerId,
-                "__keyevent@*:zadd", "__keyevent@*:zrem", "__keyevent@*:zincr", "__keyevent@*:zunionstore", "__keyevent@*:zinterstore");
+                "__keyevent@*:zadd", "__keyevent@*:zrem", "__keyevent@*:zincr", "__keyevent@*:zunionstore", "__keyevent@*:zinterstore", "__keyevent@*:zdiffstore");
     }
 
 }
