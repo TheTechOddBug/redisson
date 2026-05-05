@@ -95,7 +95,7 @@ public class ForyCodec extends BaseCodec {
     }
 
     protected ThreadSafeFory create(ForyBuilder builder) {
-        return builder.buildThreadSafeForyPool(10, 512);
+        return builder.buildThreadSafeFory();
     }
 
     private final Decoder<Object> decoder = new Decoder<Object>() {
