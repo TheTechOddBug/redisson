@@ -149,7 +149,7 @@ public class RedissonAtomicDouble extends RedissonExpirable implements RAtomicDo
 
     @Override
     public RFuture<Double> getAndAddAsync(final double delta) {
-        return commandExecutor.writeAsync(getRawName(), StringCodec.INSTANCE, new RedisStrictCommand<Double>("INCRBYFLOAT", obj -> Double.valueOf(obj.toString()) - delta), getRawName(), BigDecimal.valueOf(delta).toPlainString());
+        return commandExecutor.writeAsync(getRawName(), StringCodec.INSTANCE, new RedisStrictCommand<Double>("INCRBYFLOAT", obj -> Double.parseDouble(obj.toString()) - delta), getRawName(), BigDecimal.valueOf(delta).toPlainString());
     }
 
 

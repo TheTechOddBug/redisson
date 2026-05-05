@@ -281,8 +281,8 @@ public class RedissonStreamCommands implements RedisStreamCommands {
         public PendingMessage decode(List<Object> parts, State state) {
             PendingMessage pm = new PendingMessage(RecordId.of(parts.get(0).toString()),
                     Consumer.from(groupName, parts.get(1).toString()),
-                    Duration.of(Long.valueOf(parts.get(2).toString()), ChronoUnit.MILLIS),
-                    Long.valueOf(parts.get(3).toString()));
+                    Duration.of(Long.parseLong(parts.get(2).toString()), ChronoUnit.MILLIS),
+                    Long.parseLong(parts.get(3).toString()));
             return pm;
         }
     }

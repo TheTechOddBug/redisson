@@ -947,7 +947,7 @@ public class RedissonTest extends RedisDockerTest {
             String key = null;
             int slot = 0;
             String res = execute(source, "redis-cli", "cluster", "slots");
-            int sourceSlot = Integer.valueOf(res.split("\\n")[1]);
+            int sourceSlot = Integer.parseInt(res.split("\\n")[1]);
             for (int i = 0; i < 100000; i++) {
                 key = "" + i;
                 slot = CRC16.crc16(key.getBytes()) % MasterSlaveConnectionManager.MAX_SLOT;

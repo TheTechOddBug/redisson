@@ -95,7 +95,7 @@ public class RedisClusterNodeDecoder implements Decoder<List<RedisClusterNode>> 
                     if(parts.length == 1) {
                         slotsCollection.add(Integer.valueOf(parts[0]));
                     } else if(parts.length == 2) {
-                        for (int j = Integer.valueOf(parts[0]); j < Integer.valueOf(parts[1]) + 1; j++) {
+                        for (int j = Integer.parseInt(parts[0]); j < Integer.parseInt(parts[1]) + 1; j++) {
                             slotsCollection.add(j);
                         }
                     }

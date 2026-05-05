@@ -132,12 +132,12 @@ public class RedissonScoredSortedSetRxTest extends BaseRxTest {
     public void testIteratorSequence() {
         RScoredSortedSetRx<Integer> set = redisson.getScoredSortedSet("simple");
         for (int i = 0; i < 1000; i++) {
-            sync(set.add(i, Integer.valueOf(i)));
+            sync(set.add(i, i));
         }
 
         Set<Integer> setCopy = new HashSet<Integer>();
         for (int i = 0; i < 1000; i++) {
-            setCopy.add(Integer.valueOf(i));
+            setCopy.add(i);
         }
 
         checkIterator(set, setCopy);
@@ -341,7 +341,7 @@ public class RedissonScoredSortedSetRxTest extends BaseRxTest {
         RScoredSortedSetRx<Integer> set2 = redisson.getScoredSortedSet("simple", StringCodec.INSTANCE);
         sync(set2.add(100.2, 1));
 
-        Double res2 = sync(set2.addScore(1, new Double(12.1)));
+        Double res2 = sync(set2.addScore(1, 12.1));
         Assertions.assertTrue(new Double(112.3).compareTo(res2) == 0);
         res2 = sync(set2.getScore(1));
         Assertions.assertTrue(new Double(112.3).compareTo(res2) == 0);

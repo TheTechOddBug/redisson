@@ -89,7 +89,7 @@ import java.util.concurrent.atomic.AtomicLong;
                                 properties.get(Environment.CACHE_KEYS_FACTORY), new RedissonCacheKeysFactory(redisson.getConfig().getCodec()));
 
         String fallbackValue = (String) properties.getOrDefault(FALLBACK, "false");
-        fallback = Boolean.valueOf(fallbackValue);
+        fallback = Boolean.parseBoolean(fallbackValue);
     }
     
     protected RedissonClient createRedissonClient(Properties properties) {
