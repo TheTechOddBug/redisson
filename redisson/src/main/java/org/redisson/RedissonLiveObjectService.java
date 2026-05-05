@@ -423,6 +423,9 @@ public class RedissonLiveObjectService implements RLiveObjectService {
                         String indexName = namingScheme.getIndexName(detachedObject.getClass(), field.getName());
                         CommandBatchService ce = new CommandBatchService(commandExecutor);
                         RMultimapAsync<Object, Object> map = new RedissonSetMultimap<>(namingScheme.getCodec(), ce, indexName);
+                        if (type == RCascadeType.MERGE) {
+                            map.fastRemoveValueAsync(id);
+                        }
                         for (Object element : (Collection<Object>) object) {
                             if (element == null) {
                                 continue;
