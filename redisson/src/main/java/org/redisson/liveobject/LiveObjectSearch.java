@@ -25,8 +25,10 @@ import org.redisson.api.RSetMultimap;
 import org.redisson.api.condition.Condition;
 import org.redisson.command.CommandAsyncExecutor;
 import org.redisson.liveobject.condition.*;
+import org.redisson.liveobject.misc.ClassUtils;
 import org.redisson.liveobject.resolver.NamingScheme;
 
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.BiFunction;
@@ -42,6 +44,15 @@ public class LiveObjectSearch {
 
     public LiveObjectSearch(CommandAsyncExecutor commandExecutor) {
         this.commandExecutor = commandExecutor;
+    }
+
+    private boolean isCollectionField(Class<?> entityClass, String fieldName) {
+        try {
+            Field field = ClassUtils.getDeclaredField(entityClass, fieldName);
+            return Collection.class.isAssignableFrom(field.getType()) || field.getType().isArray();
+        } catch (NoSuchFieldException e) {
+            return false;
+        }
     }
 
     private Set<Object> traverseAnd(ANDCondition condition, NamingScheme namingScheme, Class<?> entityClass) {
@@ -60,7 +71,7 @@ public class LiveObjectSearch {
                 EQCondition eqc = (EQCondition) cond;
                 
                 String indexName = namingScheme.getIndexName(entityClass, eqc.getName());
-                if (eqc.getValue() instanceof Number) {
+                if (eqc.getValue() instanceof Number && !isCollectionField(entityClass, eqc.getName())) {
                     RScoredSortedSet<Object> values = new RedissonScoredSortedSet<>(namingScheme.getCodec(), commandExecutor, indexName, null);
                     eqNumericNames.put(values, (Number) eqc.getValue());
                 } else {
@@ -202,7 +213,7 @@ public class LiveObjectSearch {
                 EQCondition eqc = (EQCondition) cond;
                 
                 String indexName = namingScheme.getIndexName(entityClass, eqc.getName());
-                if (eqc.getValue() instanceof Number) {
+                if (eqc.getValue() instanceof Number && !isCollectionField(entityClass, eqc.getName())) {
                     RScoredSortedSet<Object> values = new RedissonScoredSortedSet<>(namingScheme.getCodec(), commandExecutor, indexName, null);
                     eqNumericNames.put(values, (Number) eqc.getValue());
                 } else {
@@ -285,7 +296,7 @@ public class LiveObjectSearch {
             EQCondition c = (EQCondition) condition;
             String indexName = namingScheme.getIndexName(entityClass, c.getName());
             
-            if (c.getValue() instanceof Number) {
+            if (c.getValue() instanceof Number && !isCollectionField(entityClass, c.getName())) {
                 RScoredSortedSet<Object> set = new RedissonScoredSortedSet<>(namingScheme.getCodec(), commandExecutor, indexName, null);
                 double v = ((Number) c.getValue()).doubleValue();
                 Collection<Object> gtIds = set.valueRange(v, true, v, true);

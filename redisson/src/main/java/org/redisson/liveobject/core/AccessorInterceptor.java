@@ -34,6 +34,7 @@ import org.redisson.liveobject.misc.Introspectior;
 import org.redisson.liveobject.resolver.MapResolver;
 import org.redisson.liveobject.resolver.NamingScheme;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -141,11 +142,15 @@ public class AccessorInterceptor {
                 return me;
             }
 
+            boolean isCollectionIndex = field.getAnnotation(RIndex.class) != null
+                    && (Collection.class.isAssignableFrom(field.getType()) || field.getType().isArray());
+
             if (!(arg instanceof RObject)
                     && (arg instanceof Collection || arg instanceof Map)
                     && TransformationMode.ANNOTATION_BASED
                     .equals(ClassUtils.getAnnotation(me.getClass().getSuperclass(),
                             REntity.class).fieldTransformation())) {
+                Object originalArg = arg;
                 RObject rObject = commandExecutor.getObjectBuilder().createObject(((RLiveObject) me).getLiveObjectId(), me.getClass().getSuperclass(), arg.getClass(), fieldName);
                 if (arg != null) {
                     if (rObject instanceof Collection) {
@@ -160,6 +165,12 @@ public class AccessorInterceptor {
                 }
                 if (rObject != null) {
                     arg = rObject;
+                }
+                if (isCollectionIndex) {
+                    removeIndex(liveMap, me, field);
+                    if (originalArg != null) {
+                        storeIndex(field, me, originalArg);
+                    }
                 }
             }
 
@@ -216,6 +227,9 @@ public class AccessorInterceptor {
         if (Number.class.isAssignableFrom(field.getType()) || PRIMITIVE_CLASSES.contains(field.getType())) {
             RScoredSortedSetAsync<Object> set = new RedissonScoredSortedSet<>(namingScheme.getCodec(), ce, indexName, null);
             set.removeAsync(((RLiveObject) me).getLiveObjectId());
+        } else if (Collection.class.isAssignableFrom(field.getType()) || field.getType().isArray()) {
+            RMultimapAsync<Object, Object> map = new RedissonSetMultimap<>(namingScheme.getCodec(), ce, indexName);
+            map.fastRemoveValueAsync(((RLiveObject) me).getLiveObjectId());
         } else {
             if (ClassUtils.isAnnotationPresent(field.getType(), REntity.class)
                     || commandExecutor.getServiceManager().getCfg().isClusterConfig()) {
@@ -281,7 +295,30 @@ public class AccessorInterceptor {
             ce = new CommandBatchService(commandExecutor);
         }
 
-        if (arg instanceof Number) {
+        if (Collection.class.isAssignableFrom(field.getType()) || field.getType().isArray()) {
+            Collection<?> coll;
+            if (arg instanceof Collection) {
+                coll = (Collection<?>) arg;
+            } else {
+                int length = Array.getLength(arg);
+                List<Object> list = new ArrayList<>(length);
+                for (int i = 0; i < length; i++) {
+                    list.add(Array.get(arg, i));
+                }
+                coll = list;
+            }
+            RMultimapAsync<Object, Object> map = new RedissonSetMultimap<>(namingScheme.getCodec(), ce, indexName);
+            for (Object element : coll) {
+                if (element == null) {
+                    continue;
+                }
+                Object k = element;
+                if (element instanceof RLiveObject) {
+                    k = ((RLiveObject) element).getLiveObjectId();
+                }
+                map.putAsync(k, ((RLiveObject) me).getLiveObjectId());
+            }
+        } else if (arg instanceof Number) {
             RScoredSortedSetAsync<Object> set = new RedissonScoredSortedSet<>(namingScheme.getCodec(), ce, indexName, null);
             set.addAsync(((Number) arg).doubleValue(), ((RLiveObject) me).getLiveObjectId());
         } else {
