@@ -194,6 +194,12 @@ public abstract class RedissonObject implements RObject {
         if (getServiceManager().getCfg().isClusterConfig()
                 && commandExecutor.getConnectionManager().calcSlot((String) keys.get(pairCount))
                     != commandExecutor.getConnectionManager().calcSlot((String) keys.get(0))) {
+            if (commandExecutor instanceof BatchService) {
+                CompletableFuture<Boolean> f = new CompletableFuture<>();
+                f.completeExceptionally(new IllegalStateException(
+                        "COPY across different slots is not supported in batch/transaction mode"));
+                return new CompletableFutureWrapper<>(f);
+            }
             return executeDumpRestoreCopy(commandExecutor, keys, replace);
         }
 
@@ -251,6 +257,9 @@ public abstract class RedissonObject implements RObject {
                     }
                     RFuture<byte[]> dumpFuture = commandExecutor.readAsync(sourceKey, ByteArrayCodec.INSTANCE, RedisCommands.DUMP, sourceKey);
                     return dumpFuture.thenCompose(dumpBytes -> {
+                        if (dumpBytes == null) {
+                            return CompletableFuture.completedFuture(prevRes);
+                        }
                         CompletionStage<Void> restoreFuture;
                         if (!replace) {
                             RFuture<Boolean> existsFuture = commandExecutor.readAsync(destKey, StringCodec.INSTANCE, RedisCommands.EXISTS, destKey);
