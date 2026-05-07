@@ -241,49 +241,75 @@ public abstract class RedissonObject implements RObject {
     }
 
     private RFuture<Boolean> executeDumpRestoreCopy(CommandAsyncExecutor commandExecutor, List<Object> keys,
-                                                     boolean replace) {
+                                                    boolean replace) {
         int pairCount = keys.size() / 2;
-        CompletableFuture<Boolean> result = CompletableFuture.completedFuture(false);
+        List<CompletableFuture<Boolean>> perPairResults = new ArrayList<>(pairCount);
 
         for (int i = 0; i < pairCount; i++) {
             String sourceKey = (String) keys.get(i);
             String destKey = (String) keys.get(pairCount + i);
-
-            result = result.thenCompose(prevRes -> {
-                String dumpScript = "local t = redis.call('pttl', KEYS[1]); "
-                                  + "if t == -2 then return nil end; "
-                                  + "return {t, redis.call('dump', KEYS[1])};";
-
-                RFuture<List<Object>> dumpFuture = commandExecutor.evalWriteAsync(sourceKey, ByteArrayCodec.INSTANCE,
-                        RedisCommands.EVAL_LIST, dumpScript, Arrays.asList(sourceKey));
-                return dumpFuture.thenCompose(dumpResult -> {
-                    if (dumpResult == null) {
-                        return CompletableFuture.completedFuture(prevRes);
-                    }
-                    long ttl = ((Number) dumpResult.get(0)).longValue();
-                    byte[] dumpBytes = (byte[]) dumpResult.get(1);
-
-                    long ttlMs = 0;
-                    if (ttl >= 0) {
-                        ttlMs = ttl;
-                    }
-                    String restoreScript = "if ARGV[1] == '1' or redis.call('exists', KEYS[1]) == 0 then "
-                                          + "redis.call('restore', KEYS[1], tonumber(ARGV[2]), ARGV[3]); "
-                                          + "return 1; "
-                                          + "end; "
-                                          + "return 0;";
-                    String replaceFlag = "0";
-                    if (replace) {
-                        replaceFlag = "1";
-                    }
-                    return commandExecutor.evalWriteAsync(destKey, StringCodec.INSTANCE, RedisCommands.EVAL_BOOLEAN,
-                            restoreScript, Arrays.asList(destKey), replaceFlag, ttlMs, dumpBytes)
-                            .thenApply(v -> true);
-                });
-            });
+            perPairResults.add(copyOnePairAcrossSlots(commandExecutor, sourceKey, destKey, replace)
+                    .toCompletableFuture());
         }
 
+        CompletableFuture<Boolean> result = CompletableFuture
+                .allOf(perPairResults.toArray(new CompletableFuture[0]))
+                .thenApply(v -> {
+                    for (CompletableFuture<Boolean> f : perPairResults) {
+                        if (Boolean.TRUE.equals(f.join())) {
+                            return true;
+                        }
+                    }
+                    return false;
+                });
+
         return new CompletableFutureWrapper<>(result);
+    }
+
+    private RFuture<Boolean> copyOnePairAcrossSlots(CommandAsyncExecutor commandExecutor,
+                                                    String sourceKey, String destKey, boolean replace) {
+        RFuture<List<Object>> dumpFuture = commandExecutor.evalWriteAsync(
+                sourceKey, ByteArrayCodec.INSTANCE, RedisCommands.EVAL_LIST,
+                "local t = redis.call('pttl', KEYS[1]) "
+                        + "if t == -2 then "
+                        +     "return nil "
+                        + "end "
+                        + "return {t, redis.call('dump', KEYS[1])} ",
+                Collections.singletonList(sourceKey));
+
+        CompletionStage<Boolean> stage = dumpFuture.thenCompose(dumpResult -> {
+            if (dumpResult == null) {
+                return CompletableFuture.completedFuture(false);
+            }
+
+            long ttl = ((Number) dumpResult.get(0)).longValue();
+            byte[] dumpBytes = (byte[]) dumpResult.get(1);
+
+            // PTTL returns -1 for keys with no expiry; map to 0 (no TTL on RESTORE).
+            long ttlMs = 0;
+            if (ttl > 0) {
+                ttlMs = ttl;
+            }
+            int replaceFlag = 0;
+            if (replace) {
+                replaceFlag = 1;
+            };
+
+            return commandExecutor.evalWriteAsync(
+                    destKey, StringCodec.INSTANCE, RedisCommands.EVAL_BOOLEAN,
+                    "if ARGV[1] == '1' then "
+                            +     "redis.call('restore', KEYS[1], tonumber(ARGV[2]), ARGV[3], 'REPLACE') "
+                            +     "return 1 "
+                            + "elseif redis.call('exists', KEYS[1]) == 0 then "
+                            +     "redis.call('restore', KEYS[1], tonumber(ARGV[2]), ARGV[3]) "
+                            +     "return 1 "
+                            + "end; "
+                            + "return 0 ",
+                    Collections.singletonList(destKey),
+                    replaceFlag, ttlMs, dumpBytes);
+        });
+
+        return new CompletableFutureWrapper<>(stage);
     }
 
     protected final RFuture<Void> renameAsync(CommandAsyncExecutor commandExecutor, List<Object> keys, Runnable runnable) {
