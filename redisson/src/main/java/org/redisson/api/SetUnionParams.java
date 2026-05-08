@@ -20,8 +20,10 @@ package org.redisson.api;
  * @author seakider
  *
  */
-public class SetUnionParams extends SetReadArgsParam implements SetUnionArgs {
+public class SetUnionParams extends SetReadArgsParam<SetUnionArgs> implements SetUnionArgs {
+
     SetUnionParams(String... names) {
         super(names);
     }
+
 }
