@@ -103,6 +103,44 @@ public interface RJsonBucketAsync<V> extends RBucketAsync<V> {
     RFuture<Void> setAsync(String path, Object value);
 
     /**
+     * Stores object into element by specified JSONPath using FPHA argument
+     * to enforce floating-point array precision.
+     * Requires <b>Redis 8.8.0 or higher.</b>
+     *
+     * @param path JSON path
+     * @param value value to set
+     * @param fpType floating-point precision type
+     * @return void
+     */
+    RFuture<Void> setAsync(String path, Object value, RJsonBucket.FpType fpType);
+
+    /**
+     * Sets Json object by JSONPath only if previous value is empty,
+     * using FPHA argument to enforce floating-point array precision.
+     * Requires <b>Redis 8.8.0 or higher.</b>
+     *
+     * @param path JSON path
+     * @param value object
+     * @param fpType floating-point precision type
+     * @return {@code true} if successful, or {@code false} if
+     *         value was already set
+     */
+    RFuture<Boolean> setIfAbsentAsync(String path, Object value, RJsonBucket.FpType fpType);
+
+    /**
+     * Sets Json object by JSONPath only if previous value is non-empty,
+     * using FPHA argument to enforce floating-point array precision.
+     * Requires <b>Redis 8.8.0 or higher.</b>
+     *
+     * @param path JSON path
+     * @param value object
+     * @param fpType floating-point precision type
+     * @return {@code true} if successful, or {@code false} if
+     *         element wasn't set
+     */
+    RFuture<Boolean> setIfExistsAsync(String path, Object value, RJsonBucket.FpType fpType);
+
+    /**
      * Returns size of string data by JSONPath
      *
      * @param path JSON path

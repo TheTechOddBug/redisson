@@ -180,6 +180,16 @@ public class RedissonJsonBucket<V> extends RedissonExpirable implements RJsonBuc
     }
 
     @Override
+    public boolean setIfAbsent(String path, Object value, RJsonBucket.FpType fpType) {
+        return get(setIfAbsentAsync(path, value, fpType));
+    }
+
+    @Override
+    public RFuture<Boolean> setIfAbsentAsync(String path, Object value, RJsonBucket.FpType fpType) {
+        return commandExecutor.writeAsync(getRawName(), codec, RedisCommands.JSON_SET_BOOLEAN, getRawName(), path, encode(value), "NX", "FPHA", fpType.name());
+    }
+
+    @Override
     public boolean trySet(String path, Object value) {
         return get(trySetAsync(path, value));
     }
@@ -228,6 +238,16 @@ public class RedissonJsonBucket<V> extends RedissonExpirable implements RJsonBuc
     @Override
     public RFuture<Boolean> setIfExistsAsync(String path, Object value) {
         return commandExecutor.writeAsync(getRawName(), codec, RedisCommands.JSON_SET_BOOLEAN, getRawName(), path, encode(value), "XX");
+    }
+
+    @Override
+    public boolean setIfExists(String path, Object value, RJsonBucket.FpType fpType) {
+        return get(setIfExistsAsync(path, value, fpType));
+    }
+
+    @Override
+    public RFuture<Boolean> setIfExistsAsync(String path, Object value, RJsonBucket.FpType fpType) {
+        return commandExecutor.writeAsync(getRawName(), codec, RedisCommands.JSON_SET_BOOLEAN, getRawName(), path, encode(value), "XX", "FPHA", fpType.name());
     }
 
     @Override
@@ -478,6 +498,16 @@ public class RedissonJsonBucket<V> extends RedissonExpirable implements RJsonBuc
     @Override
     public RFuture<Void> setAsync(String path, Object value) {
         return commandExecutor.writeAsync(getRawName(), codec, RedisCommands.JSON_SET, getRawName(), path, encode(value));
+    }
+
+    @Override
+    public void set(String path, Object value, RJsonBucket.FpType fpType) {
+        get(setAsync(path, value, fpType));
+    }
+
+    @Override
+    public RFuture<Void> setAsync(String path, Object value, RJsonBucket.FpType fpType) {
+        return commandExecutor.writeAsync(getRawName(), codec, RedisCommands.JSON_SET, getRawName(), path, encode(value), "FPHA", fpType.name());
     }
 
     @Override

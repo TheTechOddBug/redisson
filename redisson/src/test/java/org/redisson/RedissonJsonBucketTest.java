@@ -530,5 +530,41 @@ public class RedissonJsonBucketTest extends RedisDockerTest {
         assertThat(n3).containsExactly("t1", "t2");
     }
 
+    @Test
+    public void testSetWithFpha() {
+        RJsonBucket<List<Double>> al = redisson.getJsonBucket("test", new JacksonCodec<>(new TypeReference<List<Double>>(){}));
+        List<Double> values = Arrays.asList(1.5, 2.5, 3.5);
+        al.set("$", values, RJsonBucket.FpType.FP32);
+        List<Double> result = al.get();
+        assertThat(result).containsExactly(1.5, 2.5, 3.5);
+    }
+
+    @Test
+    public void testSetIfAbsentWithFpha() {
+        RJsonBucket<List<Double>> al = redisson.getJsonBucket("test", new JacksonCodec<>(new TypeReference<List<Double>>(){}));
+        List<Double> values = Arrays.asList(1.5, 2.5, 3.5);
+
+        assertThat(al.setIfAbsent("$", values, RJsonBucket.FpType.FP32)).isTrue();
+        List<Double> result = al.get();
+        assertThat(result).containsExactly(1.5, 2.5, 3.5);
+
+        assertThat(al.setIfAbsent("$", Arrays.asList(4.5, 5.5), RJsonBucket.FpType.FP32)).isFalse();
+        result = al.get();
+        assertThat(result).containsExactly(1.5, 2.5, 3.5);
+    }
+
+    @Test
+    public void testSetIfExistsWithFpha() {
+        RJsonBucket<List<Double>> al = redisson.getJsonBucket("test", new JacksonCodec<>(new TypeReference<List<Double>>(){}));
+        List<Double> values = Arrays.asList(1.5, 2.5, 3.5);
+
+        assertThat(al.setIfExists("$", values, RJsonBucket.FpType.FP32)).isFalse();
+
+        al.set("$", values, RJsonBucket.FpType.FP32);
+        assertThat(al.setIfExists("$", Arrays.asList(4.5, 5.5), RJsonBucket.FpType.FP32)).isTrue();
+        List<Double> result = al.get();
+        assertThat(result).containsExactly(4.5, 5.5);
+    }
+
 
 }
