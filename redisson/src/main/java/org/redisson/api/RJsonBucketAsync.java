@@ -109,10 +109,10 @@ public interface RJsonBucketAsync<V> extends RBucketAsync<V> {
      *
      * @param path JSON path
      * @param value value to set
-     * @param fpType floating-point precision type
+     * @param fphaType floating-point precision type
      * @return void
      */
-    RFuture<Void> setAsync(String path, Object value, RJsonBucket.FpType fpType);
+    RFuture<Void> setAsync(String path, Object value, FPHAType fphaType);
 
     /**
      * Sets Json object by JSONPath only if previous value is empty,
@@ -121,11 +121,11 @@ public interface RJsonBucketAsync<V> extends RBucketAsync<V> {
      *
      * @param path JSON path
      * @param value object
-     * @param fpType floating-point precision type
+     * @param fphaType floating-point precision type
      * @return {@code true} if successful, or {@code false} if
      *         value was already set
      */
-    RFuture<Boolean> setIfAbsentAsync(String path, Object value, RJsonBucket.FpType fpType);
+    RFuture<Boolean> setIfAbsentAsync(String path, Object value, FPHAType fphaType);
 
     /**
      * Sets Json object by JSONPath only if previous value is non-empty,
@@ -134,11 +134,11 @@ public interface RJsonBucketAsync<V> extends RBucketAsync<V> {
      *
      * @param path JSON path
      * @param value object
-     * @param fpType floating-point precision type
+     * @param fphaType floating-point precision type
      * @return {@code true} if successful, or {@code false} if
      *         element wasn't set
      */
-    RFuture<Boolean> setIfExistsAsync(String path, Object value, RJsonBucket.FpType fpType);
+    RFuture<Boolean> setIfExistsAsync(String path, Object value, FPHAType fphaType);
 
     /**
      * Returns size of string data by JSONPath

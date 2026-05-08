@@ -15,6 +15,7 @@
  */
 package org.redisson;
 
+import org.redisson.api.FPHAType;
 import org.redisson.api.JsonType;
 import org.redisson.api.RFuture;
 import org.redisson.api.RJsonBucket;
@@ -180,13 +181,13 @@ public class RedissonJsonBucket<V> extends RedissonExpirable implements RJsonBuc
     }
 
     @Override
-    public boolean setIfAbsent(String path, Object value, RJsonBucket.FpType fpType) {
-        return get(setIfAbsentAsync(path, value, fpType));
+    public boolean setIfAbsent(String path, Object value, FPHAType fphaType) {
+        return get(setIfAbsentAsync(path, value, fphaType));
     }
 
     @Override
-    public RFuture<Boolean> setIfAbsentAsync(String path, Object value, RJsonBucket.FpType fpType) {
-        return commandExecutor.writeAsync(getRawName(), codec, RedisCommands.JSON_SET_BOOLEAN, getRawName(), path, encode(value), "NX", "FPHA", fpType.name());
+    public RFuture<Boolean> setIfAbsentAsync(String path, Object value, FPHAType fphaType) {
+        return commandExecutor.writeAsync(getRawName(), codec, RedisCommands.JSON_SET_BOOLEAN, getRawName(), path, encode(value), "NX", "FPHA", fphaType.name());
     }
 
     @Override
@@ -241,13 +242,13 @@ public class RedissonJsonBucket<V> extends RedissonExpirable implements RJsonBuc
     }
 
     @Override
-    public boolean setIfExists(String path, Object value, RJsonBucket.FpType fpType) {
-        return get(setIfExistsAsync(path, value, fpType));
+    public boolean setIfExists(String path, Object value, FPHAType fphaType) {
+        return get(setIfExistsAsync(path, value, fphaType));
     }
 
     @Override
-    public RFuture<Boolean> setIfExistsAsync(String path, Object value, RJsonBucket.FpType fpType) {
-        return commandExecutor.writeAsync(getRawName(), codec, RedisCommands.JSON_SET_BOOLEAN, getRawName(), path, encode(value), "XX", "FPHA", fpType.name());
+    public RFuture<Boolean> setIfExistsAsync(String path, Object value, FPHAType fphaType) {
+        return commandExecutor.writeAsync(getRawName(), codec, RedisCommands.JSON_SET_BOOLEAN, getRawName(), path, encode(value), "XX", "FPHA", fphaType.name());
     }
 
     @Override
@@ -501,13 +502,13 @@ public class RedissonJsonBucket<V> extends RedissonExpirable implements RJsonBuc
     }
 
     @Override
-    public void set(String path, Object value, RJsonBucket.FpType fpType) {
-        get(setAsync(path, value, fpType));
+    public void set(String path, Object value, FPHAType fphaType) {
+        get(setAsync(path, value, fphaType));
     }
 
     @Override
-    public RFuture<Void> setAsync(String path, Object value, RJsonBucket.FpType fpType) {
-        return commandExecutor.writeAsync(getRawName(), codec, RedisCommands.JSON_SET, getRawName(), path, encode(value), "FPHA", fpType.name());
+    public RFuture<Void> setAsync(String path, Object value, FPHAType fphaType) {
+        return commandExecutor.writeAsync(getRawName(), codec, RedisCommands.JSON_SET, getRawName(), path, encode(value), "FPHA", fphaType.name());
     }
 
     @Override
