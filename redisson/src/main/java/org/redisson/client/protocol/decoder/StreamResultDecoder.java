@@ -80,6 +80,9 @@ public class StreamResultDecoder implements MultiDecoder<Object> {
                 }
             }
         }
+        if (result.isEmpty()) {
+            return null;
+        }
         return result;
     }
 

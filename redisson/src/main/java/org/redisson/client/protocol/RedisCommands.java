@@ -737,7 +737,7 @@ public interface RedisCommands {
                     new StreamResultDecoderV2(false),
                     new CodecDecoder(),
                     new ObjectDecoder(new StreamIdDecoder()),
-                    new StreamObjectMapReplayDecoder()), new EmptyMapConvertor());
+                    new StreamObjectMapReplayDecoder()));
 
     RedisCommand<Map<String, Map<StreamMessageId, Map<Object, Object>>>> XREAD_BLOCKING_V2 = new RedisCommand<>("XREAD", XREAD_V2.getReplayMultiDecoder());
 
@@ -746,7 +746,7 @@ public interface RedisCommands {
                     new StreamResultDecoderV2(true),
                     new CodecDecoder(),
                     new ObjectDecoder(new StreamIdDecoder()),
-                    new StreamObjectMapReplayDecoder()), new EmptyMapConvertor());
+                    new StreamObjectMapReplayDecoder()));
     
     RedisCommand<Map<StreamMessageId, Map<Object, Object>>> XREAD_BLOCKING_SINGLE_V2 =
                 new RedisCommand<>("XREAD", XREAD_SINGLE_V2.getReplayMultiDecoder());
