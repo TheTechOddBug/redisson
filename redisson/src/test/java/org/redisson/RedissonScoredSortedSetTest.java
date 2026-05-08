@@ -2060,6 +2060,78 @@ public class RedissonScoredSortedSetTest extends RedisDockerTest {
         assertThat(out.getScore("three")).isEqualTo(9);
     }
 
+    
+    @Test
+    public void testUnionWithCountAggregate() {
+        RScoredSortedSet<String> set1 = redisson.getScoredSortedSet("simple1");
+        set1.add(1, "one");
+        set1.add(2, "two");
+
+        RScoredSortedSet<String> set2 = redisson.getScoredSortedSet("simple2");
+        set2.add(10, "one");
+        set2.add(20, "two");
+        set2.add(30, "three");
+
+        RScoredSortedSet<String> out = redisson.getScoredSortedSet("out");
+        assertThat(out.union((SetUnionArgs) SetUnionArgs.names(set1.getName(), set2.getName())
+                .aggregate(RScoredSortedSet.Aggregate.COUNT))).isEqualTo(3);
+
+        assertThat(out.readAll()).containsOnly("one", "two", "three");
+        assertThat(out.getScore("one")).isEqualTo(2.0);
+        assertThat(out.getScore("two")).isEqualTo(2.0);
+        assertThat(out.getScore("three")).isEqualTo(1.0);
+    }
+
+    @Test
+    public void testIntersectionWithCountAggregate() {
+        RScoredSortedSet<String> set1 = redisson.getScoredSortedSet("simple1");
+        set1.add(1, "one");
+        set1.add(2, "two");
+
+        RScoredSortedSet<String> set2 = redisson.getScoredSortedSet("simple2");
+        set2.add(10, "one");
+        set2.add(20, "two");
+        set2.add(30, "three");
+
+        RScoredSortedSet<String> out = redisson.getScoredSortedSet("out");
+        assertThat(out.intersection((SetIntersectionArgs) SetIntersectionArgs.names(set1.getName(), set2.getName())
+                .aggregate(RScoredSortedSet.Aggregate.COUNT))).isEqualTo(2);
+
+        assertThat(out.readAll()).containsOnly("one", "two");
+        assertThat(out.getScore("one")).isEqualTo(2.0);
+        assertThat(out.getScore("two")).isEqualTo(2.0);
+    }
+
+    @Test
+    public void testReadUnionWithCountAggregate() {
+        RScoredSortedSet<String> set1 = redisson.getScoredSortedSet("simple1");
+        set1.add(1, "one");
+        set1.add(2, "two");
+
+        RScoredSortedSet<String> set2 = redisson.getScoredSortedSet("simple2");
+        set2.add(10, "one");
+        set2.add(30, "three");
+
+        Collection<String> result = set1.readUnion((SetUnionArgs) SetUnionArgs.names(set2.getName())
+                .aggregate(RScoredSortedSet.Aggregate.COUNT));
+        assertThat(result).containsExactlyInAnyOrder("one", "two", "three");
+    }
+
+    @Test
+    public void testReadIntersectionWithCountAggregate() {
+        RScoredSortedSet<String> set1 = redisson.getScoredSortedSet("simple1");
+        set1.add(1, "one");
+        set1.add(2, "two");
+
+        RScoredSortedSet<String> set2 = redisson.getScoredSortedSet("simple2");
+        set2.add(10, "one");
+        set2.add(30, "three");
+
+        Collection<String> result = set1.readIntersection((SetIntersectionArgs) SetIntersectionArgs.names(set2.getName())
+                .aggregate(RScoredSortedSet.Aggregate.COUNT));
+        assertThat(result).containsExactly("one");
+    }
+
     @Test
     public void testDistributedIterator() {
         RScoredSortedSet<String> set = redisson.getScoredSortedSet("set", StringCodec.INSTANCE);
