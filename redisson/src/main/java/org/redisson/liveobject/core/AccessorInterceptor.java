@@ -38,6 +38,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -92,6 +93,9 @@ public class AccessorInterceptor {
         Field field = ClassUtils.getDeclaredField(me.getClass().getSuperclass(), fieldName);
         Class<?> fieldType = field.getType();
 
+        boolean isCollectionIndex = field.getAnnotation(RIndex.class) != null
+                && (Collection.class.isAssignableFrom(field.getType()) || field.getType().isArray());
+
         if (isGetter(method, fieldName)) {
             if (Modifier.isTransient(field.getModifiers())) {
                 return field.get(me);
@@ -102,6 +106,9 @@ public class AccessorInterceptor {
                 RObject ar = commandExecutor.getObjectBuilder().createObject(((RLiveObject) me).getLiveObjectId(), me.getClass().getSuperclass(), fieldType, fieldName);
                 if (ar != null) {
                     commandExecutor.getObjectBuilder().store(ar, fieldName, liveMap);
+                    if (isCollectionIndex && ar instanceof Collection) {
+                        return wrapForIndexUpdates((Collection<?>) ar, field, (RLiveObject) me);
+                    }
                     return ar;
                 }
             }
@@ -114,6 +121,9 @@ public class AccessorInterceptor {
             }
             if (result instanceof RedissonReference) {
                 return commandExecutor.getObjectBuilder().fromReference((RedissonReference) result, RedissonObjectBuilder.ReferenceType.DEFAULT);
+            }
+            if (isCollectionIndex && result instanceof Collection) {
+                return wrapForIndexUpdates((Collection<?>) result, field, (RLiveObject) me);
             }
             return result;
         }
@@ -141,9 +151,6 @@ public class AccessorInterceptor {
 
                 return me;
             }
-
-            boolean isCollectionIndex = field.getAnnotation(RIndex.class) != null
-                    && (Collection.class.isAssignableFrom(field.getType()) || field.getType().isArray());
 
             if (!(arg instanceof RObject)
                     && (arg instanceof Collection || arg instanceof Map)
@@ -352,6 +359,20 @@ public class AccessorInterceptor {
 
     private static String getREntityIdFieldName(Object o) {
         return Introspectior.getREntityIdFieldName(o.getClass().getSuperclass());
+    }
+
+    private Object wrapForIndexUpdates(final Collection<?> delegate, final Field field, final RLiveObject liveObj) {
+        final NamingScheme ns = commandExecutor.getObjectBuilder().getNamingScheme(liveObj.getClass().getSuperclass());
+        final String indexName = ns.getIndexName(liveObj.getClass().getSuperclass(), field.getName());
+
+        Set<Class<?>> ifaces = new LinkedHashSet<>();
+        for (Class<?> c = delegate.getClass(); c != null; c = c.getSuperclass()) {
+            ifaces.addAll(Arrays.asList(c.getInterfaces()));
+        }
+
+        IndexAwareHandler handler = new IndexAwareHandler(delegate, liveObj, ns, indexName, commandExecutor);
+        return Proxy.newProxyInstance(delegate.getClass().getClassLoader(),
+                ifaces.toArray(new Class<?>[0]), handler);
     }
 
 }

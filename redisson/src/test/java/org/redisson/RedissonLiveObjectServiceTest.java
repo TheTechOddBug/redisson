@@ -565,6 +565,180 @@ public class RedissonLiveObjectServiceTest extends RedisDockerTest {
     }
 
     @Test
+    public void testCollectionIndexGt() {
+        RLiveObjectService s = redisson.getLiveObjectService();
+
+        TestIndexed t1 = new TestIndexed("1");
+        t1.setScores(new HashSet<>(Arrays.asList(10, 20, 30)));
+        s.persist(t1);
+
+        Collection<TestIndexed> result = s.find(TestIndexed.class, Conditions.gt("scores", 15));
+        assertThat(result).hasSize(1);
+        assertThat(result.iterator().next().getId()).isEqualTo("1");
+    }
+
+    @Test
+    public void testCollectionIndexDirectMutation() {
+        RLiveObjectService s = redisson.getLiveObjectService();
+
+        TestIndexed t1 = new TestIndexed("1");
+        t1.setTags(new ArrayList<>(Arrays.asList("java", "redis")));
+        t1 = s.persist(t1);
+
+        // Mutate collection directly via getter — should update index
+        t1.getTags().add("kotlin");
+        assertThat(t1.getTags()).contains("kotlin");
+
+        Collection<TestIndexed> result = s.find(TestIndexed.class, Conditions.eq("tags", "kotlin"));
+        assertThat(result).hasSize(1);
+        assertThat(result.iterator().next().getId()).isEqualTo("1");
+    }
+
+    @Test
+    public void testCollectionIndexRemoveElement() {
+        RLiveObjectService s = redisson.getLiveObjectService();
+
+        TestIndexed t1 = new TestIndexed("1");
+        t1.setTags(new ArrayList<>(Arrays.asList("java", "redis", "go")));
+        t1 = s.persist(t1);
+
+        t1.getTags().remove("java");
+
+        Collection<TestIndexed> result = s.find(TestIndexed.class, Conditions.eq("tags", "java"));
+        assertThat(result).isEmpty();
+
+        result = s.find(TestIndexed.class, Conditions.eq("tags", "redis"));
+        assertThat(result).hasSize(1);
+
+        result = s.find(TestIndexed.class, Conditions.eq("tags", "go"));
+        assertThat(result).hasSize(1);
+    }
+
+    @Test
+    public void testCollectionIndexClearCollection() {
+        RLiveObjectService s = redisson.getLiveObjectService();
+
+        TestIndexed t1 = new TestIndexed("1");
+        t1.setTags(new ArrayList<>(Arrays.asList("java", "redis")));
+        t1 = s.persist(t1);
+
+        t1.getTags().clear();
+
+        Collection<TestIndexed> result = s.find(TestIndexed.class, Conditions.eq("tags", "java"));
+        assertThat(result).isEmpty();
+
+        result = s.find(TestIndexed.class, Conditions.eq("tags", "redis"));
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    public void testCollectionIndexAddAll() {
+        RLiveObjectService s = redisson.getLiveObjectService();
+
+        TestIndexed t1 = new TestIndexed("1");
+        t1.setTags(new ArrayList<>(Arrays.asList("java")));
+        t1 = s.persist(t1);
+
+        t1.getTags().addAll(Arrays.asList("go", "rust"));
+
+        Collection<TestIndexed> result = s.find(TestIndexed.class, Conditions.eq("tags", "go"));
+        assertThat(result).hasSize(1);
+        assertThat(result.iterator().next().getId()).isEqualTo("1");
+
+        result = s.find(TestIndexed.class, Conditions.eq("tags", "rust"));
+        assertThat(result).hasSize(1);
+
+        result = s.find(TestIndexed.class, Conditions.eq("tags", "java"));
+        assertThat(result).hasSize(1);
+    }
+
+    @Test
+    public void testCollectionIndexRangeEmpty() {
+        RLiveObjectService s = redisson.getLiveObjectService();
+
+        TestIndexed t1 = new TestIndexed("1");
+        t1.setScores(new HashSet<>(Arrays.asList(10, 20)));
+        s.persist(t1);
+
+        Collection<TestIndexed> result = s.find(TestIndexed.class, Conditions.gt("scores", 100));
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    public void testCollectionIndexRangeBoundary() {
+        RLiveObjectService s = redisson.getLiveObjectService();
+
+        TestIndexed t1 = new TestIndexed("1");
+        t1.setScores(new HashSet<>(Arrays.asList(10)));
+        s.persist(t1);
+
+        Collection<TestIndexed> result = s.find(TestIndexed.class, Conditions.gt("scores", 10));
+        assertThat(result).isEmpty();
+
+        result = s.find(TestIndexed.class, Conditions.ge("scores", 10));
+        assertThat(result).hasSize(1);
+        assertThat(result.iterator().next().getId()).isEqualTo("1");
+    }
+
+    @Test
+    public void testCollectionIndexRangeOr() {
+        RLiveObjectService s = redisson.getLiveObjectService();
+
+        TestIndexed t1 = new TestIndexed("1");
+        t1.setScores(new HashSet<>(Arrays.asList(50)));
+        s.persist(t1);
+
+        TestIndexed t2 = new TestIndexed("2");
+        t2.setScores(new HashSet<>(Arrays.asList(3)));
+        s.persist(t2);
+
+        Collection<TestIndexed> result = s.find(TestIndexed.class,
+                Conditions.or(Conditions.gt("scores", 40), Conditions.lt("scores", 5)));
+        assertThat(result).hasSize(2);
+    }
+
+    @Test
+    public void testCollectionIndexRangeAnd() {
+        RLiveObjectService s = redisson.getLiveObjectService();
+
+        TestIndexed t1 = new TestIndexed("1");
+        t1.setTags(new ArrayList<>(Arrays.asList("a", "b")));
+        t1.setScores(new HashSet<>(Arrays.asList(80)));
+        s.persist(t1);
+
+        TestIndexed t2 = new TestIndexed("2");
+        t2.setTags(new ArrayList<>(Arrays.asList("a")));
+        t2.setScores(new HashSet<>(Arrays.asList(5)));
+        s.persist(t2);
+
+        Collection<TestIndexed> result = s.find(TestIndexed.class,
+                Conditions.and(Conditions.eq("tags", "a"), Conditions.gt("scores", 10)));
+        assertThat(result).hasSize(1);
+        assertThat(result.iterator().next().getId()).isEqualTo("1");
+    }
+
+    @Test
+    public void testCollectionIndexLtLe() {
+        RLiveObjectService s = redisson.getLiveObjectService();
+
+        TestIndexed t1 = new TestIndexed("1");
+        t1.setScores(new HashSet<>(Arrays.asList(5, 10)));
+        s.persist(t1);
+
+        TestIndexed t2 = new TestIndexed("2");
+        t2.setScores(new HashSet<>(Arrays.asList(50)));
+        s.persist(t2);
+
+        Collection<TestIndexed> result = s.find(TestIndexed.class, Conditions.lt("scores", 10));
+        assertThat(result).hasSize(1);
+        assertThat(result.iterator().next().getId()).isEqualTo("1");
+
+        result = s.find(TestIndexed.class, Conditions.le("scores", 15));
+        assertThat(result).hasSize(1);
+        assertThat(result.iterator().next().getId()).isEqualTo("1");
+    }
+
+    @Test
     public void testFindEq2() {
         RLiveObjectService s = redisson.getLiveObjectService();
         TestIndexed t1 = new TestIndexed("1");
