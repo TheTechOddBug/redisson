@@ -27,7 +27,7 @@ import org.redisson.api.annotation.RId;
 import org.redisson.api.annotation.RIndex;
 import org.redisson.api.condition.Conditions;
 
-public class IndexAwareHandlerTest extends RedisDockerTest {
+public class CollectionSyncProxyTest extends RedisDockerTest {
 
     @REntity
     public static class TaggedItem {

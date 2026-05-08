@@ -38,7 +38,6 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Proxy;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -365,14 +364,53 @@ public class AccessorInterceptor {
         final NamingScheme ns = commandExecutor.getObjectBuilder().getNamingScheme(liveObj.getClass().getSuperclass());
         final String indexName = ns.getIndexName(liveObj.getClass().getSuperclass(), field.getName());
 
-        Set<Class<?>> ifaces = new LinkedHashSet<>();
-        for (Class<?> c = delegate.getClass(); c != null; c = c.getSuperclass()) {
-            ifaces.addAll(Arrays.asList(c.getInterfaces()));
-        }
+        return org.redisson.misc.CollectionSyncProxy.wrap(
+                delegate,
+                element -> syncCollectionIndex(ns, indexName, liveObj, element),
+                element -> removeCollectionIndex(ns, indexName, liveObj, element),
+                (oldElement, newElement) -> replaceCollectionIndex(ns, indexName, liveObj, oldElement, newElement),
+                () -> clearCollectionIndex(ns, indexName, liveObj));
+    }
 
-        IndexAwareHandler handler = new IndexAwareHandler(delegate, liveObj, ns, indexName, commandExecutor);
-        return Proxy.newProxyInstance(delegate.getClass().getClassLoader(),
-                ifaces.toArray(new Class<?>[0]), handler);
+    private void syncCollectionIndex(NamingScheme ns, String indexName, RLiveObject liveObj, Object element) {
+        CommandBatchService ce = new CommandBatchService(commandExecutor);
+        new RedissonSetMultimap<>(ns.getCodec(), ce, indexName)
+                .putAsync(resolveKey(element), liveObj.getLiveObjectId());
+        ce.execute();
+    }
+
+    private void removeCollectionIndex(NamingScheme ns, String indexName, RLiveObject liveObj, Object element) {
+        CommandBatchService ce = new CommandBatchService(commandExecutor);
+        new RedissonSetMultimap<>(ns.getCodec(), ce, indexName)
+                .removeAsync(resolveKey(element), liveObj.getLiveObjectId());
+        ce.execute();
+    }
+
+    private void replaceCollectionIndex(NamingScheme ns, String indexName, RLiveObject liveObj,
+                                         Object oldElement, Object newElement) {
+        CommandBatchService ce = new CommandBatchService(commandExecutor);
+        RMultimapAsync<Object, Object> map = new RedissonSetMultimap<>(ns.getCodec(), ce, indexName);
+        if (oldElement != null) {
+            map.removeAsync(resolveKey(oldElement), liveObj.getLiveObjectId());
+        }
+        if (newElement != null) {
+            map.putAsync(resolveKey(newElement), liveObj.getLiveObjectId());
+        }
+        ce.execute();
+    }
+
+    private void clearCollectionIndex(NamingScheme ns, String indexName, RLiveObject liveObj) {
+        CommandBatchService ce = new CommandBatchService(commandExecutor);
+        new RedissonSetMultimap<>(ns.getCodec(), ce, indexName)
+                .fastRemoveValueAsync(liveObj.getLiveObjectId());
+        ce.execute();
+    }
+
+    private static Object resolveKey(Object element) {
+        if (element instanceof RLiveObject) {
+            return ((RLiveObject) element).getLiveObjectId();
+        }
+        return element;
     }
 
 }
