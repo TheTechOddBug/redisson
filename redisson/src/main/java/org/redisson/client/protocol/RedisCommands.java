@@ -829,6 +829,7 @@ public interface RedisCommands {
     RedisStrictCommand<Void> XADD_VOID = new RedisStrictCommand<Void>("XADD", new VoidReplayConvertor());
     RedisStrictCommand<Long> XLEN = new RedisStrictCommand<Long>("XLEN");
     RedisStrictCommand<Long> XACK = new RedisStrictCommand<Long>("XACK");
+    RedisStrictCommand<Long> XNACK = new RedisStrictCommand<Long>("XNACK");
     RedisStrictCommand<Long> XDEL = new RedisStrictCommand<Long>("XDEL");
     RedisStrictCommand<Long> XTRIM = new RedisStrictCommand<Long>("XTRIM");
     RedisCommand<Object> XPENDING = new RedisCommand<Object>("XPENDING",

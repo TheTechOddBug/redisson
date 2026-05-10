@@ -700,6 +700,111 @@ public class RedissonStreamTest extends RedisDockerTest {
     }
 
     @Test
+    public void testNackFail() {
+        RStream<String, String> stream = redisson.getStream("test");
+
+        stream.add(StreamAddArgs.entry("0", "0"));
+        stream.createGroup(StreamCreateGroupArgs.name("testGroup"));
+
+        StreamMessageId id1 = stream.add(StreamAddArgs.entry("1", "1"));
+        StreamMessageId id2 = stream.add(StreamAddArgs.entry("2", "2"));
+
+        Map<StreamMessageId, Map<String, String>> s = stream.readGroup("testGroup", "consumer1", StreamReadGroupArgs.neverDelivered());
+        assertThat(s.size()).isEqualTo(2);
+
+        long nacked = stream.nack(StreamNackArgs.group("testGroup", StreamNackMode.FAIL).ids(id1, id2));
+        assertThat(nacked).isEqualTo(2);
+
+        List<PendingEntry> pending = stream.listPending(StreamPendingRangeArgs.groupName("testGroup")
+                                                                            .startId(StreamMessageId.MIN)
+                                                                            .endId(StreamMessageId.MAX)
+                                                                            .count(10));
+        assertThat(pending).hasSize(2);
+        assertThat(pending).extracting(PendingEntry::getId).containsExactly(id1, id2);
+        for (PendingEntry entry : pending) {
+            assertThat(entry.getConsumerName()).isEmpty();
+            assertThat(entry.getIdleTime()).isEqualTo(-1);
+            assertThat(entry.getDeliveryCount()).isOne();
+        }
+
+        List<StreamMessageId> claimed = stream.fastClaim("testGroup", "consumer2", 0, TimeUnit.MILLISECONDS, id1, id2);
+        assertThat(claimed).containsExactlyInAnyOrder(id1, id2);
+    }
+
+    @Test
+    public void testNackSilent() {
+        RStream<String, String> stream = redisson.getStream("test");
+
+        stream.add(StreamAddArgs.entry("0", "0"));
+        stream.createGroup(StreamCreateGroupArgs.name("testGroup"));
+
+        StreamMessageId id = stream.add(StreamAddArgs.entry("1", "1"));
+
+        Map<StreamMessageId, Map<String, String>> s = stream.readGroup("testGroup", "consumer1", StreamReadGroupArgs.neverDelivered());
+        assertThat(s.size()).isEqualTo(1);
+
+        long nacked = stream.nack(StreamNackArgs.group("testGroup", StreamNackMode.SILENT).ids(id));
+        assertThat(nacked).isEqualTo(1);
+
+        List<PendingEntry> pending = stream.listPending(StreamPendingRangeArgs.groupName("testGroup")
+                                                                            .startId(StreamMessageId.MIN)
+                                                                            .endId(StreamMessageId.MAX)
+                                                                            .count(10));
+        assertThat(pending).hasSize(1);
+        assertThat(pending.get(0).getId()).isEqualTo(id);
+        assertThat(pending.get(0).getConsumerName()).isEmpty();
+        assertThat(pending.get(0).getDeliveryCount()).isZero();
+    }
+
+    @Test
+    public void testNackFatal() {
+        RStream<String, String> stream = redisson.getStream("test");
+
+        stream.add(StreamAddArgs.entry("0", "0"));
+        stream.createGroup(StreamCreateGroupArgs.name("testGroup"));
+
+        StreamMessageId id = stream.add(StreamAddArgs.entry("1", "1"));
+
+        Map<StreamMessageId, Map<String, String>> s = stream.readGroup("testGroup", "consumer1", StreamReadGroupArgs.neverDelivered());
+        assertThat(s.size()).isEqualTo(1);
+
+        long nacked = stream.nack(StreamNackArgs.group("testGroup", StreamNackMode.FATAL).ids(id));
+        assertThat(nacked).isEqualTo(1);
+
+        List<PendingEntry> pending = stream.listPending(StreamPendingRangeArgs.groupName("testGroup")
+                                                                            .startId(StreamMessageId.MIN)
+                                                                            .endId(StreamMessageId.MAX)
+                                                                            .count(10));
+        assertThat(pending).hasSize(1);
+        assertThat(pending.get(0).getId()).isEqualTo(id);
+        assertThat(pending.get(0).getConsumerName()).isEmpty();
+        assertThat(pending.get(0).getDeliveryCount()).isEqualTo(Long.MAX_VALUE);
+    }
+
+    @Test
+    public void testNackForceWithRetryCount() {
+        RStream<String, String> stream = redisson.getStream("test");
+
+        StreamMessageId id = stream.add(StreamAddArgs.entry("1", "1"));
+        stream.createGroup(StreamCreateGroupArgs.name("testGroup").id(StreamMessageId.ALL));
+
+        long nacked = stream.nack(StreamNackArgs.group("testGroup", StreamNackMode.FATAL)
+                                                .ids(id, new StreamMessageId(1, 0))
+                                                .retryCount(3)
+                                                .force());
+        assertThat(nacked).isEqualTo(1);
+
+        List<PendingEntry> pending = stream.listPending(StreamPendingRangeArgs.groupName("testGroup")
+                                                                            .startId(StreamMessageId.MIN)
+                                                                            .endId(StreamMessageId.MAX)
+                                                                            .count(10));
+        assertThat(pending).hasSize(1);
+        assertThat(pending.get(0).getId()).isEqualTo(id);
+        assertThat(pending.get(0).getConsumerName()).isEmpty();
+        assertThat(pending.get(0).getDeliveryCount()).isEqualTo(3);
+    }
+
+    @Test
     public void testReadGroupMulti() {
         RStream<String, String> stream1 = redisson.getStream("test1");
         RStream<String, String> stream2 = redisson.getStream("test2");

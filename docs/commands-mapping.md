@@ -207,6 +207,7 @@ XDEL|RStream.<br/>remove()<br/>removeAsync()|RStreamReactive.<br/>remove()|RStre
 XGROUP|RStream.<br/>createGroup()<br/>removeGroup()<br/>updateGroup()<br/>createGroupAsync()<br/>removeGroupAsync()<br/>updateGroupAsync()|RStreamReactive.<br/>createGroup()<br/>removeGroup()<br/>updateGroup()|RStreamRx.<br/>createGroup()<br/>removeGroup()<br/>updateGroup()|
 XINFO|RStream.<br/>getInfo()<br/>listGroups()<br/>listConsumers()<br/>getInfoAsync()<br/>listGroupsAsync()<br/>listConsumersAsync()|RStreamReactive.<br/>getInfo()<br/>listGroups()<br/>listConsumers()|RStreamRx.<br/>getInfo()<br/>listGroups()<br/>listConsumers()|
 XLEN|RStream.<br/>size()<br/>sizeAsync()|RStreamReactive.<br/>size()|RStreamRx.<br/>size()|
+XNACK|RStream.<br/>nack()<br/>nackAsync()|RStreamReactive.<br/>nack()|RStreamRx.<br/>nack()|
 XPENDING|RStream.<br/>listPending()<br/>listPendingAsync()|RStreamReactive.<br/>listPending()|RStreamRx.<br/>listPending()|
 XRANGE|RStream.<br/>range()<br/>rangeAsync()|RStreamReactive.<br/>range()|RStreamRx.<br/>range()|
 XREAD|RStream.<br/>read()<br/>readAsync()|RStreamReactive.<br/>read()|RStreamRx.<br/>read()|

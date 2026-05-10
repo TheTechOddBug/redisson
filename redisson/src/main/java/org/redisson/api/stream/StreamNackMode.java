@@ -16,20 +16,16 @@
 package org.redisson.api.stream;
 
 /**
- * Arguments object for RStream.ack() method.
+ * Negative acknowledgement mode used by RStream.nack() method.
  *
- * @author seakider
+ * @author lamnt2008
  *
  */
-public interface StreamAckArgs extends StreamReferencesArgs<StreamAckArgs> {
+public enum StreamNackMode {
 
-    /**
-     * Defines group name of messages to acknowledges and conditionally deletes
-     *
-     * @param groupName name of group
-     * @return arguments object
-     */
-    static StreamMessageIdArgs<StreamAckArgs> group(String groupName) {
-        return new StreamAckParams(groupName);
-    }
+    SILENT,
+
+    FAIL,
+
+    FATAL
 }
