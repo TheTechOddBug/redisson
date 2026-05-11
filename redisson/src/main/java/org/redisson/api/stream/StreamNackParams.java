@@ -17,20 +17,37 @@ package org.redisson.api.stream;
 
 /**
  *
- * @author seakider
+ * @author lamnt2008
  *
  */
-public class StreamAckParams extends BaseReferencesParams<StreamAckArgs> implements StreamAckArgs, StreamMessageIdArgs<StreamAckArgs> {
-    private final String groupName;
-    private StreamMessageId[] ids;
+public class StreamNackParams implements StreamNackArgs, StreamMessageIdArgs<StreamNackArgs> {
 
-    public StreamAckParams(String groupName) {
+    private final String groupName;
+    private final StreamNackMode mode;
+    private StreamMessageId[] ids;
+    private Long retryCount;
+    private boolean force;
+
+    public StreamNackParams(String groupName, StreamNackMode mode) {
         this.groupName = groupName;
+        this.mode = mode;
     }
 
     @Override
-    public StreamAckArgs ids(StreamMessageId... ids) {
+    public StreamNackArgs ids(StreamMessageId... ids) {
         this.ids = ids;
+        return this;
+    }
+
+    @Override
+    public StreamNackArgs retryCount(long count) {
+        this.retryCount = count;
+        return this;
+    }
+
+    @Override
+    public StreamNackArgs force() {
+        this.force = true;
         return this;
     }
 
@@ -38,7 +55,19 @@ public class StreamAckParams extends BaseReferencesParams<StreamAckArgs> impleme
         return groupName;
     }
 
+    public StreamNackMode getMode() {
+        return mode;
+    }
+
     public StreamMessageId[] getIds() {
         return ids;
+    }
+
+    public Long getRetryCount() {
+        return retryCount;
+    }
+
+    public boolean isForce() {
+        return force;
     }
 }
