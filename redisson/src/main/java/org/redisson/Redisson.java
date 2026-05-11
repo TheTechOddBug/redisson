@@ -43,6 +43,7 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
@@ -1319,11 +1320,21 @@ public final class Redisson implements RedissonClient {
         connectionManager.shutdown();
     }
 
+    @Override
+    public CompletableFuture<Void> shutdownAsync() {
+        return shutdownAsync(Duration.ZERO, Duration.ofSeconds(2));
+    }
 
     @Override
     public void shutdown(long quietPeriod, long timeout, TimeUnit unit) {
         writeBehindService.stop();
         connectionManager.shutdown(quietPeriod, timeout, unit);
+    }
+
+    @Override
+    public CompletableFuture<Void> shutdownAsync(Duration quietPeriod, Duration timeout) {
+        writeBehindService.stop();
+        return connectionManager.shutdownAsync(quietPeriod.toNanos(), timeout.toNanos(), TimeUnit.NANOSECONDS);
     }
 
     @Override

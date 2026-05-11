@@ -291,4 +291,12 @@ public class ReplicatedConnectionManager extends MasterSlaveConnectionManager {
         closeNodeConnections();
         super.shutdown(quietPeriod, timeout, unit);
     }
+
+    @Override
+    public CompletableFuture<Void> shutdownAsync(long quietPeriod, long timeout, TimeUnit unit) {
+        if (monitorFuture != null) {
+            monitorFuture.cancel();
+        }
+        return closeNodeConnectionsAsync().thenCompose(v -> super.shutdownAsync(quietPeriod, timeout, unit));
+    }
 }

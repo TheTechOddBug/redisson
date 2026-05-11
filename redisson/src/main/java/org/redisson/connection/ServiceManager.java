@@ -413,6 +413,20 @@ public final class ServiceManager {
         lastFutures.clear();
     }
 
+    public CompletableFuture<Void> shutdownFuturesAsync(long timeout, TimeUnit unit) {
+        CompletableFuture<?>[] array = StreamSupport.stream(lastFutures.spliterator(), false)
+                .toArray(CompletableFuture[]::new);
+        CompletableFuture<Void> allFutures = CompletableFuture.allOf(array);
+        Timeout timeoutHandle = newTimeout(t -> allFutures.completeExceptionally(new TimeoutException()), timeout, unit);
+        return allFutures
+                .whenComplete((v, e) -> timeoutHandle.cancel())
+                .exceptionally(e -> null)
+                .thenRun(() -> {
+                    lastFutures.forEach(f -> f.completeExceptionally(new RedissonShutdownException("Redisson is shutdown")));
+                    lastFutures.clear();
+                });
+    }
+
     public void close() {
         shutdownLatch.set(true);
     }

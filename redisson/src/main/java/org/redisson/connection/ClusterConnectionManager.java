@@ -1084,6 +1084,14 @@ public class ClusterConnectionManager extends MasterSlaveConnectionManager {
         super.shutdown(quietPeriod, timeout, unit);
     }
 
+    @Override
+    public CompletableFuture<Void> shutdownAsync(long quietPeriod, long timeout, TimeUnit unit) {
+        if (monitorFuture != null) {
+            monitorFuture.cancel();
+        }
+        return closeNodeConnectionsAsync().thenCompose(v -> super.shutdownAsync(quietPeriod, timeout, unit));
+    }
+
     private Collection<ClusterPartition> getLastPartitions() {
         return lastUri2Partition.values().stream().collect(Collectors.toMap(e -> e.getNodeId(), Function.identity(),
                                                                 BinaryOperator.maxBy(Comparator.comparing(e -> e.getTime())))).values();

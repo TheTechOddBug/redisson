@@ -711,6 +711,18 @@ public class SentinelConnectionManager extends MasterSlaveConnectionManager {
         super.shutdown(quietPeriod, timeout, unit);
     }
 
+    @Override
+    public CompletableFuture<Void> shutdownAsync(long quietPeriod, long timeout, TimeUnit unit) {
+        if (monitorFuture != null) {
+            monitorFuture.cancel();
+        }
+        List<CompletableFuture<Void>> futures = sentinels.values().stream()
+                .map(s -> s.shutdownAsync().toCompletableFuture())
+                .collect(Collectors.toList());
+        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                .thenCompose(v -> super.shutdownAsync(quietPeriod, timeout, unit));
+    }
+
     private RedisURI applyNatMap(RedisURI address) {
         RedisURI result = cfg.getNatMapper().map(address);
         if (!result.equals(address)) {

@@ -92,6 +92,13 @@ public class MasterSlaveConnectionManager implements ConnectionManager {
                 .forEach(f -> f.toCompletableFuture().join());
     }
 
+    protected CompletableFuture<Void> closeNodeConnectionsAsync() {
+        List<CompletableFuture<Void>> futures = nodeConnections.values().stream()
+                .map(c -> c.getRedisClient().shutdownAsync().toCompletableFuture())
+                .collect(Collectors.toList());
+        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+    }
+
     protected void closeNodeConnection(RedisConnection conn) {
         if (nodeConnections.values().removeAll(Arrays.asList(conn))) {
             conn.closeAsync();
@@ -615,6 +622,68 @@ public class MasterSlaveConnectionManager implements ConnectionManager {
     @Override
     public void shutdown() {
         shutdown(0, 10, TimeUnit.SECONDS); //default netty value
+    }
+
+    @Override
+    public CompletableFuture<Void> shutdownAsync(long quietPeriod, long timeout, TimeUnit unit) {
+        if (dnsMonitor != null) {
+            dnsMonitor.stop();
+        }
+        long timeoutInNanos = unit.toNanos(timeout);
+
+        serviceManager.close();
+        serviceManager.getConnectionWatcher().stop();
+        serviceManager.getResolverGroup().close();
+
+        return serviceManager.shutdownFuturesAsync(timeout, unit)
+                .thenCompose(v -> {
+                    if (!isInitialized()) {
+                        return CompletableFuture.completedFuture(null);
+                    }
+                    List<CompletableFuture<Void>> futures = new ArrayList<>();
+                    for (MasterSlaveEntry entry : getEntrySet()) {
+                        futures.add(entry.shutdownAsync());
+                    }
+                    CompletableFuture<Void> allEntries = CompletableFuture.allOf(
+                            futures.toArray(new CompletableFuture[0]));
+                    serviceManager.newTimeout(t -> allEntries.completeExceptionally(new TimeoutException()),
+                            timeoutInNanos, TimeUnit.NANOSECONDS);
+                    return allEntries.exceptionally(e -> null);
+                })
+                .thenCompose(v -> {
+                    if (serviceManager.getCfg().getExecutor() == null) {
+                        serviceManager.getExecutor().shutdown();
+                        return CompletableFuture.runAsync(() -> {
+                            try {
+                                serviceManager.getExecutor().awaitTermination(timeoutInNanos, TimeUnit.NANOSECONDS);
+                            } catch (InterruptedException e) {
+                                Thread.currentThread().interrupt();
+                            }
+                        });
+                    }
+                    return CompletableFuture.completedFuture(null);
+                })
+                .thenCompose(v -> {
+                    serviceManager.getTimer().stop();
+                    if (serviceManager.getCfg().getEventLoopGroup() == null) {
+                        long quietPeriodNanos = unit.toNanos(quietPeriod);
+                        if (timeoutInNanos < quietPeriodNanos) {
+                            quietPeriodNanos = 0;
+                        }
+                        io.netty.util.concurrent.Future<?> nettyFuture = serviceManager.getGroup()
+                                .shutdownGracefully(quietPeriodNanos, timeoutInNanos, TimeUnit.NANOSECONDS);
+                        CompletableFuture<Void> cf = new CompletableFuture<>();
+                        nettyFuture.addListener(f -> {
+                            if (f.isSuccess()) {
+                                cf.complete(null);
+                            } else {
+                                cf.completeExceptionally(f.cause());
+                            }
+                        });
+                        return cf;
+                    }
+                    return CompletableFuture.completedFuture(null);
+                });
     }
 
     @Override
