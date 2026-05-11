@@ -18,7 +18,6 @@ package org.redisson.client.protocol.decoder;
 import org.redisson.api.stream.StreamMessageId;
 import org.redisson.client.handler.State;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
