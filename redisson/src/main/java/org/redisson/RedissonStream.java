@@ -27,10 +27,7 @@ import org.redisson.client.protocol.RedisCommands;
 import org.redisson.client.protocol.StreamEntryStatus;
 import org.redisson.client.protocol.decoder.*;
 import org.redisson.command.CommandAsyncExecutor;
-import org.redisson.misc.CompletableFutureWrapper;
-
 import java.util.*;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -251,12 +248,14 @@ public class RedissonStream<K, V> extends RedissonExpirable implements RStream<K
 
     @Override
     public Map<String, Map<StreamMessageId, Map<K, V>>> readGroup(String groupName, String consumerName, StreamMultiReadGroupArgs args) {
-        return get(readGroupAsync(groupName, consumerName, args));
+        Map<String, Map<StreamMessageId, Map<K, V>>> result = get(readGroupAsync(groupName, consumerName, args));
+        return result != null ? result : Collections.emptyMap();
     }
 
     @Override
     public Map<StreamMessageId, Map<K, V>> readGroup(String groupName, String consumerName, StreamReadGroupArgs args) {
-        return get(readGroupAsync(groupName, consumerName, args));
+        Map<StreamMessageId, Map<K, V>> result = get(readGroupAsync(groupName, consumerName, args));
+        return result != null ? result : Collections.emptyMap();
     }
 
     @Override
@@ -301,20 +300,10 @@ public class RedissonStream<K, V> extends RedissonExpirable implements RStream<K
             params.add(nextId.toString());
         }
 
-        RFuture<Map<String, Map<StreamMessageId, Map<K, V>>>> f;
         if (rp.getTimeout() != null) {
-            f = commandExecutor.writeAsync(getRawName(), codec, RedisCommands.XREADGROUP_BLOCKING, params.toArray());
-        } else {
-            f = commandExecutor.writeAsync(getRawName(), codec, RedisCommands.XREADGROUP, params.toArray());
+            return commandExecutor.writeAsync(getRawName(), codec, RedisCommands.XREADGROUP_BLOCKING, params.toArray());
         }
-        CompletionStage<Map<String, Map<StreamMessageId, Map<K, V>>>> result =
-                f.thenApply(r -> {
-                    if (r != null) {
-                        return r;
-                    }
-                    return Collections.<String, Map<StreamMessageId, Map<K, V>>>emptyMap();
-                });
-        return new CompletableFutureWrapper<>(result);
+        return commandExecutor.writeAsync(getRawName(), codec, RedisCommands.XREADGROUP, params.toArray());
     }
 
     @Override
@@ -354,20 +343,10 @@ public class RedissonStream<K, V> extends RedissonExpirable implements RStream<K
             params.add(rp.getId1().toString());
         }
 
-        RFuture<Map<StreamMessageId, Map<K, V>>> f;
         if (rp.getTimeout() != null) {
-            f = commandExecutor.writeAsync(getRawName(), codec, RedisCommands.XREADGROUP_BLOCKING_SINGLE, params.toArray());
-        } else {
-            f = commandExecutor.writeAsync(getRawName(), codec, RedisCommands.XREADGROUP_SINGLE, params.toArray());
+            return commandExecutor.writeAsync(getRawName(), codec, RedisCommands.XREADGROUP_BLOCKING_SINGLE, params.toArray());
         }
-        CompletionStage<Map<StreamMessageId, Map<K, V>>> result =
-                f.thenApply(r -> {
-                    if (r != null) {
-                        return r;
-                    }
-                    return Collections.<StreamMessageId, Map<K, V>>emptyMap();
-                });
-        return new CompletableFutureWrapper<>(result);
+        return commandExecutor.writeAsync(getRawName(), codec, RedisCommands.XREADGROUP_SINGLE, params.toArray());
     }
 
     @Override
@@ -419,7 +398,8 @@ public class RedissonStream<K, V> extends RedissonExpirable implements RStream<K
 
     @Override
     public Map<String, Map<StreamMessageId, Map<K, V>>> read(StreamMultiReadArgs args) {
-        return get(readAsync(args));
+        Map<String, Map<StreamMessageId, Map<K, V>>> result = get(readAsync(args));
+        return result != null ? result : Collections.emptyMap();
     }
 
     @Override
@@ -446,25 +426,16 @@ public class RedissonStream<K, V> extends RedissonExpirable implements RStream<K
             params.add(nextId.toString());
         }
 
-        RFuture<Map<String, Map<StreamMessageId, Map<K, V>>>> f;
         if (rp.getTimeout() != null) {
-            f = commandExecutor.readAsync(getRawName(), codec, RedisCommands.XREAD_BLOCKING, params.toArray());
-        } else {
-            f = commandExecutor.readAsync(getRawName(), codec, RedisCommands.XREAD, params.toArray());
+            return commandExecutor.readAsync(getRawName(), codec, RedisCommands.XREAD_BLOCKING, params.toArray());
         }
-        CompletionStage<Map<String, Map<StreamMessageId, Map<K, V>>>> result =
-                f.thenApply(r -> {
-                    if (r != null) {
-                        return r;
-                    }
-                    return Collections.<String, Map<StreamMessageId, Map<K, V>>>emptyMap();
-                });
-        return new CompletableFutureWrapper<>(result);
+        return commandExecutor.readAsync(getRawName(), codec, RedisCommands.XREAD, params.toArray());
     }
 
     @Override
     public Map<StreamMessageId, Map<K, V>> read(StreamReadArgs args) {
-        return get(readAsync(args));
+        Map<StreamMessageId, Map<K, V>> result = get(readAsync(args));
+        return result != null ? result : Collections.emptyMap();
     }
 
     @Override
@@ -486,20 +457,10 @@ public class RedissonStream<K, V> extends RedissonExpirable implements RStream<K
         params.add(getRawName());
         params.add(rp.getId1());
 
-        RFuture<Map<StreamMessageId, Map<K, V>>> f;
         if (rp.getTimeout() != null) {
-            f = commandExecutor.readAsync(getRawName(), codec, RedisCommands.XREAD_BLOCKING_SINGLE, params.toArray());
-        } else {
-            f = commandExecutor.readAsync(getRawName(), codec, RedisCommands.XREAD_SINGLE, params.toArray());
+            return commandExecutor.readAsync(getRawName(), codec, RedisCommands.XREAD_BLOCKING_SINGLE, params.toArray());
         }
-        CompletionStage<Map<StreamMessageId, Map<K, V>>> result =
-                f.thenApply(r -> {
-                    if (r != null) {
-                        return r;
-                    }
-                    return Collections.<StreamMessageId, Map<K, V>>emptyMap();
-                });
-        return new CompletableFutureWrapper<>(result);
+        return commandExecutor.readAsync(getRawName(), codec, RedisCommands.XREAD_SINGLE, params.toArray());
     }
 
     @Override
