@@ -16,7 +16,6 @@
 package org.redisson.api;
 
 import io.reactivex.rxjava3.core.Completable;
-import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Single;
 import org.redisson.api.stream.*;
 import org.redisson.client.protocol.StreamEntryStatus;
@@ -298,7 +297,7 @@ public interface RStreamRx<K, V> extends RExpirableRx {
      * @param args - method arguments object
      * @return stream data mapped by stream name and Stream Message ID
      */
-    Maybe<Map<String, Map<StreamMessageId, Map<K, V>>>> readGroup(String groupName, String consumerName, StreamMultiReadGroupArgs args);
+    Single<Map<String, Map<StreamMessageId, Map<K, V>>>> readGroup(String groupName, String consumerName, StreamMultiReadGroupArgs args);
 
     /**
      * Read stream data from consumer group and current stream only.
@@ -316,7 +315,7 @@ public interface RStreamRx<K, V> extends RExpirableRx {
      * @param args - method arguments object
      * @return stream data mapped by Stream Message ID
      */
-    Maybe<Map<StreamMessageId, Map<K, V>>> readGroup(String groupName, String consumerName, StreamReadGroupArgs args);
+    Single<Map<StreamMessageId, Map<K, V>>> readGroup(String groupName, String consumerName, StreamReadGroupArgs args);
 
     /**
      * Returns number of entries in stream
@@ -375,7 +374,7 @@ public interface RStreamRx<K, V> extends RExpirableRx {
      * @param args - method arguments object
      * @return stream data mapped by stream name and Stream Message ID
      */
-    Maybe<Map<String, Map<StreamMessageId, Map<K, V>>>> read(StreamMultiReadArgs args);
+    Single<Map<String, Map<StreamMessageId, Map<K, V>>>> read(StreamMultiReadArgs args);
 
     /**
      * Read stream data from current stream only.
@@ -393,7 +392,7 @@ public interface RStreamRx<K, V> extends RExpirableRx {
      * @param args - method arguments object
      * @return stream data mapped by Stream Message ID
      */
-    Maybe<Map<StreamMessageId, Map<K, V>>> read(StreamReadArgs args);
+    Single<Map<StreamMessageId, Map<K, V>>> read(StreamReadArgs args);
 
     /**
      * Returns stream data in range by specified start Stream ID (included) and end Stream ID (included).

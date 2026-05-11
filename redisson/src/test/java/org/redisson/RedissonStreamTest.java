@@ -1101,7 +1101,7 @@ public class RedissonStreamTest extends RedisDockerTest {
         RStream<String, String> stream = redisson.getStream("test");
         Map<StreamMessageId, Map<String, String>> result = stream.readAsync(
                 StreamReadArgs.greaterThan(new StreamMessageId(0, 0)).count(10)).toCompletableFuture().get();
-        assertThat(result).isNull();
+        assertThat(result).isEmpty();
     }
 
     @Test
@@ -1113,7 +1113,7 @@ public class RedissonStreamTest extends RedisDockerTest {
 
         Map<StreamMessageId, Map<String, String>> result = stream.readGroupAsync(
                 "testGroup", "consumer1", StreamReadGroupArgs.neverDelivered()).toCompletableFuture().get();
-        assertThat(result).isNull();
+        assertThat(result).isEmpty();
     }
 
     @Test
@@ -1121,7 +1121,7 @@ public class RedissonStreamTest extends RedisDockerTest {
         RStreamReactive<String, String> stream = redisson.reactive().getStream("test");
         Map<StreamMessageId, Map<String, String>> result = stream.read(
                 StreamReadArgs.greaterThan(new StreamMessageId(0, 0)).count(10)).block();
-        assertThat(result).isNull();
+        assertThat(result).isEmpty();
     }
 
     @Test
@@ -1134,7 +1134,7 @@ public class RedissonStreamTest extends RedisDockerTest {
         RStreamReactive<String, String> streamReactive = redisson.reactive().getStream("test");
         Map<StreamMessageId, Map<String, String>> result = streamReactive.readGroup(
                 "testGroup", "consumer1", StreamReadGroupArgs.neverDelivered()).block();
-        assertThat(result).isNull();
+        assertThat(result).isEmpty();
     }
 
     @Test
@@ -1142,7 +1142,7 @@ public class RedissonStreamTest extends RedisDockerTest {
         RStreamRx<String, String> stream = redisson.rxJava().getStream("test");
         Map<StreamMessageId, Map<String, String>> result = stream.read(
                 StreamReadArgs.greaterThan(new StreamMessageId(0, 0)).count(10)).blockingGet();
-        assertThat(result).isNull();
+        assertThat(result).isEmpty();
     }
 
     @Test
@@ -1155,7 +1155,7 @@ public class RedissonStreamTest extends RedisDockerTest {
         RStreamRx<String, String> streamRx = redisson.rxJava().getStream("test");
         Map<StreamMessageId, Map<String, String>> result = streamRx.readGroup(
                 "testGroup", "consumer1", StreamReadGroupArgs.neverDelivered()).blockingGet();
-        assertThat(result).isNull();
+        assertThat(result).isEmpty();
     }
 
     @Test
@@ -1165,7 +1165,7 @@ public class RedissonStreamTest extends RedisDockerTest {
                 .readAsync(StreamReadArgs.greaterThan(new StreamMessageId(0, 0)).count(10));
         batch.execute();
         Map<StreamMessageId, Map<Object, Object>> result = future.get();
-        assertThat(result).isNull();
+        assertThat(result).isEmpty();
     }
 
     @Test
@@ -1180,7 +1180,7 @@ public class RedissonStreamTest extends RedisDockerTest {
                 .readGroupAsync("testGroup", "consumer1", StreamReadGroupArgs.neverDelivered());
         batch.execute();
         Map<StreamMessageId, Map<Object, Object>> result = future.get();
-        assertThat(result).isNull();
+        assertThat(result).isEmpty();
     }
 
     @Test
@@ -1197,7 +1197,7 @@ public class RedissonStreamTest extends RedisDockerTest {
         Map<String, Map<StreamMessageId, Map<String, String>>> result = stream.readAsync(
                 StreamMultiReadArgs.greaterThan(new StreamMessageId(0, 0), "test2", new StreamMessageId(0, 0)).count(10))
                 .toCompletableFuture().get();
-        assertThat(result).isNull();
+        assertThat(result).isEmpty();
     }
 
     @Test
@@ -1215,7 +1215,7 @@ public class RedissonStreamTest extends RedisDockerTest {
                 "testGroup", "consumer1", StreamMultiReadGroupArgs.greaterThan(
                         StreamMessageId.NEVER_DELIVERED, "test2", StreamMessageId.NEVER_DELIVERED))
                 .toCompletableFuture().get();
-        assertThat(result).isNull();
+        assertThat(result).isEmpty();
     }
 
     @Test
@@ -1224,7 +1224,7 @@ public class RedissonStreamTest extends RedisDockerTest {
         Map<String, Map<StreamMessageId, Map<String, String>>> result = stream.read(
                 StreamMultiReadArgs.greaterThan(new StreamMessageId(0, 0), "test2", new StreamMessageId(0, 0)).count(10))
                 .block();
-        assertThat(result).isNull();
+        assertThat(result).isEmpty();
     }
 
     @Test
@@ -1243,7 +1243,7 @@ public class RedissonStreamTest extends RedisDockerTest {
                 "testGroup", "consumer1", StreamMultiReadGroupArgs.greaterThan(
                         StreamMessageId.NEVER_DELIVERED, "test2", StreamMessageId.NEVER_DELIVERED))
                 .block();
-        assertThat(result).isNull();
+        assertThat(result).isEmpty();
     }
 
     @Test
@@ -1252,7 +1252,7 @@ public class RedissonStreamTest extends RedisDockerTest {
         Map<String, Map<StreamMessageId, Map<String, String>>> result = stream.read(
                 StreamMultiReadArgs.greaterThan(new StreamMessageId(0, 0), "test2", new StreamMessageId(0, 0)).count(10))
                 .blockingGet();
-        assertThat(result).isNull();
+        assertThat(result).isEmpty();
     }
 
     @Test
@@ -1271,7 +1271,7 @@ public class RedissonStreamTest extends RedisDockerTest {
                 "testGroup", "consumer1", StreamMultiReadGroupArgs.greaterThan(
                         StreamMessageId.NEVER_DELIVERED, "test2", StreamMessageId.NEVER_DELIVERED))
                 .blockingGet();
-        assertThat(result).isNull();
+        assertThat(result).isEmpty();
     }
 
     @Test
@@ -1282,7 +1282,7 @@ public class RedissonStreamTest extends RedisDockerTest {
                         .readAsync(StreamMultiReadArgs.greaterThan(new StreamMessageId(0, 0), "test2", new StreamMessageId(0, 0)).count(10));
         batch.execute();
         Map<String, Map<StreamMessageId, Map<Object, Object>>> result = future.get();
-        assertThat(result).isNull();
+        assertThat(result).isEmpty();
     }
 
     @Test
@@ -1303,7 +1303,7 @@ public class RedissonStreamTest extends RedisDockerTest {
                                 StreamMessageId.NEVER_DELIVERED, "test2", StreamMessageId.NEVER_DELIVERED));
         batch.execute();
         Map<String, Map<StreamMessageId, Map<Object, Object>>> result = future.get();
-        assertThat(result).isNull();
+        assertThat(result).isEmpty();
     }
 
     @Test
