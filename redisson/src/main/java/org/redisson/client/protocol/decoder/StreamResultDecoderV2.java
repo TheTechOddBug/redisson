@@ -67,9 +67,6 @@ public class StreamResultDecoderV2 implements MultiDecoder<Object> {
                 }
             }
         }
-        if (result.isEmpty()) {
-            return Collections.emptyMap();
-        }
         return result;
     }
 
