@@ -26,7 +26,7 @@ import org.redisson.pubsub.PublishSubscribeService;
 
 import java.net.InetSocketAddress;
 import java.util.Collection;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -72,7 +72,7 @@ public interface ConnectionManager {
 
     void shutdown(long quietPeriod, long timeout, TimeUnit unit);
 
-    CompletableFuture<Void> shutdownAsync(long quietPeriod, long timeout, TimeUnit unit);
+    CompletionStage<Void> shutdownAsync(long quietPeriod, long timeout, TimeUnit unit);
     
     ServiceManager getServiceManager();
 

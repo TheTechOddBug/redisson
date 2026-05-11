@@ -617,6 +617,14 @@ public class RedissonTest extends RedisDockerTest {
     }
 
     @Test
+    public void testShutdownAsync() {
+        RedissonClient r = createInstance();
+        r.shutdownAsync().toCompletableFuture().join();
+        Assertions.assertTrue(r.isShuttingDown());
+        Assertions.assertTrue(r.isShutdown());
+    }
+
+    @Test
     public void testCredentials() {
         GenericContainer<?> redis = createContainer("--requirepass", "1234");
         redis.start();

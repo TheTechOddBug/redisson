@@ -15,11 +15,11 @@
  */
 package org.redisson;
 
+import org.redisson.api.*;
 import org.redisson.api.ExecutorOptions;
 import org.redisson.api.LocalCachedMapOptions;
 import org.redisson.api.MapCacheOptions;
 import org.redisson.api.MapOptions;
-import org.redisson.api.*;
 import org.redisson.api.options.*;
 import org.redisson.api.redisnode.*;
 import org.redisson.client.codec.Codec;
@@ -43,7 +43,7 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
@@ -1321,7 +1321,7 @@ public final class Redisson implements RedissonClient {
     }
 
     @Override
-    public CompletableFuture<Void> shutdownAsync() {
+    public CompletionStage<Void> shutdownAsync() {
         return shutdownAsync(Duration.ZERO, Duration.ofSeconds(2));
     }
 
@@ -1332,7 +1332,7 @@ public final class Redisson implements RedissonClient {
     }
 
     @Override
-    public CompletableFuture<Void> shutdownAsync(Duration quietPeriod, Duration timeout) {
+    public CompletionStage<Void> shutdownAsync(Duration quietPeriod, Duration timeout) {
         writeBehindService.stop();
         return connectionManager.shutdownAsync(quietPeriod.toNanos(), timeout.toNanos(), TimeUnit.NANOSECONDS);
     }

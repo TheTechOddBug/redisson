@@ -712,14 +712,12 @@ public class SentinelConnectionManager extends MasterSlaveConnectionManager {
     }
 
     @Override
-    public CompletableFuture<Void> shutdownAsync(long quietPeriod, long timeout, TimeUnit unit) {
+    public CompletionStage<Void> shutdownAsync(long quietPeriod, long timeout, TimeUnit unit) {
         if (monitorFuture != null) {
             monitorFuture.cancel();
         }
-        List<CompletableFuture<Void>> futures = sentinels.values().stream()
-                .map(s -> s.shutdownAsync().toCompletableFuture())
-                .collect(Collectors.toList());
-        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+        return CompletableFuture.allOf(sentinels.values().stream()
+                        .map(s -> s.shutdownAsync().toCompletableFuture()).toArray(CompletableFuture[]::new))
                 .thenCompose(v -> super.shutdownAsync(quietPeriod, timeout, unit));
     }
 

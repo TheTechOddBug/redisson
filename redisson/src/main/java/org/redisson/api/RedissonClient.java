@@ -24,7 +24,7 @@ import org.redisson.config.Config;
 
 import java.time.Duration;
 import java.util.Collection;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -2241,7 +2241,7 @@ public interface RedissonClient {
      * 
      * This equates to invoke shutdownAsync(Duration.ZERO, Duration.ofSeconds(2));
      */
-    CompletableFuture<Void> shutdownAsync();
+    CompletionStage<Void> shutdownAsync();
 
     /**
      * Shuts down Redisson instance but <b>NOT</b> Redis server
@@ -2268,7 +2268,7 @@ public interface RedissonClient {
      * @param timeout     the maximum amount of time to wait until the executor is {@linkplain #shutdown()}
      *                    regardless if a task was submitted during the quiet period
      */
-    CompletableFuture<Void> shutdownAsync(Duration quietPeriod, Duration timeout);
+    CompletionStage<Void> shutdownAsync(Duration quietPeriod, Duration timeout);
 
     /**
      * Allows to get configuration provided
