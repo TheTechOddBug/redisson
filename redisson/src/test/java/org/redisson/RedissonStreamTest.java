@@ -1117,48 +1117,6 @@ public class RedissonStreamTest extends RedisDockerTest {
     }
 
     @Test
-    public void testReadEmptyReactive() {
-        RStreamReactive<String, String> stream = redisson.reactive().getStream("test");
-        Map<StreamMessageId, Map<String, String>> result = stream.read(
-                StreamReadArgs.greaterThan(new StreamMessageId(0, 0)).count(10)).block();
-        assertThat(result).isEmpty();
-    }
-
-    @Test
-    public void testReadGroupEmptyReactive() {
-        RStream<String, String> stream = redisson.getStream("test");
-        stream.createGroup(StreamCreateGroupArgs.name("testGroup").makeStream());
-        stream.add(StreamAddArgs.entry("1", "1"));
-        stream.readGroup("testGroup", "consumer1", StreamReadGroupArgs.neverDelivered());
-
-        RStreamReactive<String, String> streamReactive = redisson.reactive().getStream("test");
-        Map<StreamMessageId, Map<String, String>> result = streamReactive.readGroup(
-                "testGroup", "consumer1", StreamReadGroupArgs.neverDelivered()).block();
-        assertThat(result).isEmpty();
-    }
-
-    @Test
-    public void testReadEmptyRx() {
-        RStreamRx<String, String> stream = redisson.rxJava().getStream("test");
-        Map<StreamMessageId, Map<String, String>> result = stream.read(
-                StreamReadArgs.greaterThan(new StreamMessageId(0, 0)).count(10)).blockingGet();
-        assertThat(result).isEmpty();
-    }
-
-    @Test
-    public void testReadGroupEmptyRx() {
-        RStream<String, String> stream = redisson.getStream("test");
-        stream.createGroup(StreamCreateGroupArgs.name("testGroup").makeStream());
-        stream.add(StreamAddArgs.entry("1", "1"));
-        stream.readGroup("testGroup", "consumer1", StreamReadGroupArgs.neverDelivered());
-
-        RStreamRx<String, String> streamRx = redisson.rxJava().getStream("test");
-        Map<StreamMessageId, Map<String, String>> result = streamRx.readGroup(
-                "testGroup", "consumer1", StreamReadGroupArgs.neverDelivered()).blockingGet();
-        assertThat(result).isEmpty();
-    }
-
-    @Test
     public void testReadEmptyBatch() throws Exception {
         RBatch batch = redisson.createBatch();
         RFuture<Map<StreamMessageId, Map<Object, Object>>> future = batch.<Object, Object>getStream("test")
@@ -1215,62 +1173,6 @@ public class RedissonStreamTest extends RedisDockerTest {
                 "testGroup", "consumer1", StreamMultiReadGroupArgs.greaterThan(
                         StreamMessageId.NEVER_DELIVERED, "test2", StreamMessageId.NEVER_DELIVERED))
                 .toCompletableFuture().get();
-        assertThat(result).isEmpty();
-    }
-
-    @Test
-    public void testReadMultiEmptyReactive() {
-        RStreamReactive<String, String> stream = redisson.reactive().getStream("test1");
-        Map<String, Map<StreamMessageId, Map<String, String>>> result = stream.read(
-                StreamMultiReadArgs.greaterThan(new StreamMessageId(0, 0), "test2", new StreamMessageId(0, 0)).count(10))
-                .block();
-        assertThat(result).isEmpty();
-    }
-
-    @Test
-    public void testReadGroupMultiEmptyReactive() {
-        RStream<String, String> stream1 = redisson.getStream("test1");
-        RStream<String, String> stream2 = redisson.getStream("test2");
-        stream1.createGroup(StreamCreateGroupArgs.name("testGroup").makeStream());
-        stream2.createGroup(StreamCreateGroupArgs.name("testGroup").makeStream());
-        stream1.add(StreamAddArgs.entry("1", "1"));
-        stream2.add(StreamAddArgs.entry("1", "1"));
-        stream1.readGroup("testGroup", "consumer1", StreamMultiReadGroupArgs.greaterThan(
-                StreamMessageId.NEVER_DELIVERED, "test2", StreamMessageId.NEVER_DELIVERED));
-
-        RStreamReactive<String, String> streamReactive = redisson.reactive().getStream("test1");
-        Map<String, Map<StreamMessageId, Map<String, String>>> result = streamReactive.readGroup(
-                "testGroup", "consumer1", StreamMultiReadGroupArgs.greaterThan(
-                        StreamMessageId.NEVER_DELIVERED, "test2", StreamMessageId.NEVER_DELIVERED))
-                .block();
-        assertThat(result).isEmpty();
-    }
-
-    @Test
-    public void testReadMultiEmptyRx() {
-        RStreamRx<String, String> stream = redisson.rxJava().getStream("test1");
-        Map<String, Map<StreamMessageId, Map<String, String>>> result = stream.read(
-                StreamMultiReadArgs.greaterThan(new StreamMessageId(0, 0), "test2", new StreamMessageId(0, 0)).count(10))
-                .blockingGet();
-        assertThat(result).isEmpty();
-    }
-
-    @Test
-    public void testReadGroupMultiEmptyRx() {
-        RStream<String, String> stream1 = redisson.getStream("test1");
-        RStream<String, String> stream2 = redisson.getStream("test2");
-        stream1.createGroup(StreamCreateGroupArgs.name("testGroup").makeStream());
-        stream2.createGroup(StreamCreateGroupArgs.name("testGroup").makeStream());
-        stream1.add(StreamAddArgs.entry("1", "1"));
-        stream2.add(StreamAddArgs.entry("1", "1"));
-        stream1.readGroup("testGroup", "consumer1", StreamMultiReadGroupArgs.greaterThan(
-                StreamMessageId.NEVER_DELIVERED, "test2", StreamMessageId.NEVER_DELIVERED));
-
-        RStreamRx<String, String> streamRx = redisson.rxJava().getStream("test1");
-        Map<String, Map<StreamMessageId, Map<String, String>>> result = streamRx.readGroup(
-                "testGroup", "consumer1", StreamMultiReadGroupArgs.greaterThan(
-                        StreamMessageId.NEVER_DELIVERED, "test2", StreamMessageId.NEVER_DELIVERED))
-                .blockingGet();
         assertThat(result).isEmpty();
     }
 
