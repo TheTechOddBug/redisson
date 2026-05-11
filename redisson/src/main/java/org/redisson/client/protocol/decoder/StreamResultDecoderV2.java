@@ -21,6 +21,7 @@ import org.redisson.client.codec.StringCodec;
 import org.redisson.client.handler.State;
 import org.redisson.client.protocol.Decoder;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -65,6 +66,9 @@ public class StreamResultDecoderV2 implements MultiDecoder<Object> {
                     return ee;
                 }
             }
+        }
+        if (result.isEmpty()) {
+            return Collections.emptyMap();
         }
         return result;
     }

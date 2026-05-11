@@ -1200,7 +1200,119 @@ public class RedissonStreamTest extends RedisDockerTest {
         Map<StreamMessageId, Map<String, String>> result2 = stream2.read(StreamReadArgs.greaterThan(new StreamMessageId(0, 0)).count(10));
         assertThat(result2).isEmpty();
     }
-    
+
+    @Test
+    public void testReadEmptyAsync() throws Exception {
+        RStream<String, String> stream = redisson.getStream("test");
+        Map<StreamMessageId, Map<String, String>> result = stream.readAsync(
+                StreamReadArgs.greaterThan(new StreamMessageId(0, 0)).count(10)).toCompletableFuture().get();
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    public void testReadGroupEmptyAsync() throws Exception {
+        RStream<String, String> stream = redisson.getStream("test");
+        stream.createGroup(StreamCreateGroupArgs.name("testGroup").makeStream());
+        stream.add(StreamAddArgs.entry("1", "1"));
+        stream.readGroup("testGroup", "consumer1", StreamReadGroupArgs.neverDelivered());
+
+        Map<StreamMessageId, Map<String, String>> result = stream.readGroupAsync(
+                "testGroup", "consumer1", StreamReadGroupArgs.neverDelivered()).toCompletableFuture().get();
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    public void testReadEmptyBatch() throws Exception {
+        RBatch batch = redisson.createBatch();
+        RFuture<Map<StreamMessageId, Map<Object, Object>>> future = batch.<Object, Object>getStream("test")
+                .readAsync(StreamReadArgs.greaterThan(new StreamMessageId(0, 0)).count(10));
+        batch.execute();
+        Map<StreamMessageId, Map<Object, Object>> result = future.get();
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    public void testReadGroupEmptyBatch() throws Exception {
+        RStream<String, String> stream = redisson.getStream("test");
+        stream.createGroup(StreamCreateGroupArgs.name("testGroup").makeStream());
+        stream.add(StreamAddArgs.entry("1", "1"));
+        stream.readGroup("testGroup", "consumer1", StreamReadGroupArgs.neverDelivered());
+
+        RBatch batch = redisson.createBatch();
+        RFuture<Map<StreamMessageId, Map<Object, Object>>> future = batch.<Object, Object>getStream("test")
+                .readGroupAsync("testGroup", "consumer1", StreamReadGroupArgs.neverDelivered());
+        batch.execute();
+        Map<StreamMessageId, Map<Object, Object>> result = future.get();
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    public void testReadMultiEmpty() {
+        RStream<String, String> stream = redisson.getStream("test1");
+        Map<String, Map<StreamMessageId, Map<String, String>>> result = stream.read(
+                StreamMultiReadArgs.greaterThan(new StreamMessageId(0, 0), "test2", new StreamMessageId(0, 0)).count(10));
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    public void testReadMultiEmptyAsync() throws Exception {
+        RStream<String, String> stream = redisson.getStream("test1");
+        Map<String, Map<StreamMessageId, Map<String, String>>> result = stream.readAsync(
+                StreamMultiReadArgs.greaterThan(new StreamMessageId(0, 0), "test2", new StreamMessageId(0, 0)).count(10))
+                .toCompletableFuture().get();
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    public void testReadGroupMultiEmptyAsync() throws Exception {
+        RStream<String, String> stream1 = redisson.getStream("test1");
+        RStream<String, String> stream2 = redisson.getStream("test2");
+        stream1.createGroup(StreamCreateGroupArgs.name("testGroup").makeStream());
+        stream2.createGroup(StreamCreateGroupArgs.name("testGroup").makeStream());
+        stream1.add(StreamAddArgs.entry("1", "1"));
+        stream2.add(StreamAddArgs.entry("1", "1"));
+        stream1.readGroup("testGroup", "consumer1", StreamMultiReadGroupArgs.greaterThan(
+                StreamMessageId.NEVER_DELIVERED, "test2", StreamMessageId.NEVER_DELIVERED));
+
+        Map<String, Map<StreamMessageId, Map<String, String>>> result = stream1.readGroupAsync(
+                "testGroup", "consumer1", StreamMultiReadGroupArgs.greaterThan(
+                        StreamMessageId.NEVER_DELIVERED, "test2", StreamMessageId.NEVER_DELIVERED))
+                .toCompletableFuture().get();
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    public void testReadMultiEmptyBatch() throws Exception {
+        RBatch batch = redisson.createBatch();
+        RFuture<Map<String, Map<StreamMessageId, Map<Object, Object>>>> future =
+                batch.<Object, Object>getStream("test1")
+                        .readAsync(StreamMultiReadArgs.greaterThan(new StreamMessageId(0, 0), "test2", new StreamMessageId(0, 0)).count(10));
+        batch.execute();
+        Map<String, Map<StreamMessageId, Map<Object, Object>>> result = future.get();
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    public void testReadGroupMultiEmptyBatch() throws Exception {
+        RStream<String, String> stream1 = redisson.getStream("test1");
+        RStream<String, String> stream2 = redisson.getStream("test2");
+        stream1.createGroup(StreamCreateGroupArgs.name("testGroup").makeStream());
+        stream2.createGroup(StreamCreateGroupArgs.name("testGroup").makeStream());
+        stream1.add(StreamAddArgs.entry("1", "1"));
+        stream2.add(StreamAddArgs.entry("1", "1"));
+        stream1.readGroup("testGroup", "consumer1", StreamMultiReadGroupArgs.greaterThan(
+                StreamMessageId.NEVER_DELIVERED, "test2", StreamMessageId.NEVER_DELIVERED));
+
+        RBatch batch = redisson.createBatch();
+        RFuture<Map<String, Map<StreamMessageId, Map<Object, Object>>>> future =
+                batch.<Object, Object>getStream("test1")
+                        .readGroupAsync("testGroup", "consumer1", StreamMultiReadGroupArgs.greaterThan(
+                                StreamMessageId.NEVER_DELIVERED, "test2", StreamMessageId.NEVER_DELIVERED));
+        batch.execute();
+        Map<String, Map<StreamMessageId, Map<Object, Object>>> result = future.get();
+        assertThat(result).isEmpty();
+    }
+
     @Test
     public void testAdd() {
         RStream<String, String> stream = redisson.getStream("test1");
