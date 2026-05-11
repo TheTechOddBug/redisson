@@ -1,5 +1,6 @@
 package org.redisson.rx;
 
+import io.reactivex.rxjava3.observers.TestObserver;
 import org.junit.jupiter.api.Test;
 import org.redisson.RedisDockerTest;
 import org.redisson.api.RStream;
@@ -7,17 +8,24 @@ import org.redisson.api.RStreamRx;
 import org.redisson.api.stream.*;
 
 import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.concurrent.TimeUnit;
 
 public class RedissonStreamRxTest extends BaseRxTest {
 
     @Test
     public void testReadEmptyRx() {
         RStreamRx<String, String> stream = redisson.getStream("test");
-        Map<StreamMessageId, Map<String, String>> result = stream.read(
-                StreamReadArgs.greaterThan(new StreamMessageId(0, 0)).count(10)).blockingGet();
-        assertThat(result).isEmpty();
+        TestObserver<Map<StreamMessageId, Map<String, String>>> observer = stream.read(
+                StreamReadArgs.greaterThan(new StreamMessageId(0, 0)).count(10)).test();
+
+        assertNoValues(observer);
+    }
+
+    private static void assertNoValues(TestObserver<?> observer) {
+        observer.awaitDone(1, TimeUnit.SECONDS);
+        observer.assertNoErrors();
+        observer.assertComplete();
+        observer.assertNoValues();
     }
 
     @Test
@@ -28,18 +36,18 @@ public class RedissonStreamRxTest extends BaseRxTest {
         stream.readGroup("testGroup", "consumer1", StreamReadGroupArgs.neverDelivered());
 
         RStreamRx<String, String> streamRx = redisson.getStream("test");
-        Map<StreamMessageId, Map<String, String>> result = streamRx.readGroup(
-                "testGroup", "consumer1", StreamReadGroupArgs.neverDelivered()).blockingGet();
-        assertThat(result).isEmpty();
+        TestObserver<Map<StreamMessageId, Map<String, String>>> observer = streamRx.readGroup(
+                "testGroup", "consumer1", StreamReadGroupArgs.neverDelivered()).test();
+        assertNoValues(observer);
     }
 
     @Test
     public void testReadMultiEmptyRx() {
         RStreamRx<String, String> stream = redisson.getStream("test1");
-        Map<String, Map<StreamMessageId, Map<String, String>>> result = stream.read(
-                StreamMultiReadArgs.greaterThan(new StreamMessageId(0, 0), "test2", new StreamMessageId(0, 0)).count(10))
-                .blockingGet();
-        assertThat(result).isEmpty();
+        TestObserver<Map<String, Map<StreamMessageId, Map<String, String>>>> observer = stream.read(
+                        StreamMultiReadArgs.greaterThan(new StreamMessageId(0, 0), "test2", new StreamMessageId(0, 0)).count(10))
+                .test();
+        assertNoValues(observer);
     }
 
     @Test
@@ -54,11 +62,11 @@ public class RedissonStreamRxTest extends BaseRxTest {
                 StreamMessageId.NEVER_DELIVERED, "test2", StreamMessageId.NEVER_DELIVERED));
 
         RStreamRx<String, String> streamRx = redisson.getStream("test1");
-        Map<String, Map<StreamMessageId, Map<String, String>>> result = streamRx.readGroup(
-                "testGroup", "consumer1", StreamMultiReadGroupArgs.greaterThan(
-                        StreamMessageId.NEVER_DELIVERED, "test2", StreamMessageId.NEVER_DELIVERED))
-                .blockingGet();
-        assertThat(result).isEmpty();
+        TestObserver<Map<String, Map<StreamMessageId, Map<String, String>>>> observer = streamRx.readGroup(
+                        "testGroup", "consumer1", StreamMultiReadGroupArgs.greaterThan(
+                                StreamMessageId.NEVER_DELIVERED, "test2", StreamMessageId.NEVER_DELIVERED))
+                .test();
+        assertNoValues(observer);
     }
 
 }
