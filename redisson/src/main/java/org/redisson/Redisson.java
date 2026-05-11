@@ -1322,7 +1322,7 @@ public final class Redisson implements RedissonClient {
 
     @Override
     public CompletableFuture<Void> shutdownAsync() {
-        return shutdownAsync(0, 2, TimeUnit.SECONDS);
+        return shutdownAsync(Duration.ZERO, Duration.ofSeconds(2));
     }
 
     @Override
@@ -1332,9 +1332,9 @@ public final class Redisson implements RedissonClient {
     }
 
     @Override
-    public CompletableFuture<Void> shutdownAsync(long quietPeriod, long timeout, TimeUnit unit) {
+    public CompletableFuture<Void> shutdownAsync(Duration quietPeriod, Duration timeout) {
         writeBehindService.stop();
-        return connectionManager.shutdownAsync(quietPeriod, timeout, unit);
+        return connectionManager.shutdownAsync(quietPeriod.toNanos(), timeout.toNanos(), TimeUnit.NANOSECONDS);
     }
 
     @Override

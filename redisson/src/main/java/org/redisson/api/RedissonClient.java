@@ -22,6 +22,7 @@ import org.redisson.client.codec.Codec;
 import org.redisson.codec.JsonCodec;
 import org.redisson.config.Config;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -2238,7 +2239,7 @@ public interface RedissonClient {
     /**
      * Shutdown Redisson instance asynchronously but <b>NOT</b> Redis server
      * 
-     * This equates to invoke shutdownAsync(0, 2, TimeUnit.SECONDS);
+     * This equates to invoke shutdownAsync(Duration.ZERO, Duration.ofSeconds(2));
      */
     CompletableFuture<Void> shutdownAsync();
 
@@ -2266,9 +2267,8 @@ public interface RedissonClient {
      * @param quietPeriod the quiet period as described in the documentation
      * @param timeout     the maximum amount of time to wait until the executor is {@linkplain #shutdown()}
      *                    regardless if a task was submitted during the quiet period
-     * @param unit        the unit of {@code quietPeriod} and {@code timeout}
      */
-    CompletableFuture<Void> shutdownAsync(long quietPeriod, long timeout, TimeUnit unit);
+    CompletableFuture<Void> shutdownAsync(Duration quietPeriod, Duration timeout);
 
     /**
      * Allows to get configuration provided

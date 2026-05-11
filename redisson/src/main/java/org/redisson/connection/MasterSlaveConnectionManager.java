@@ -667,6 +667,9 @@ public class MasterSlaveConnectionManager implements ConnectionManager {
                     serviceManager.getTimer().stop();
                     if (serviceManager.getCfg().getEventLoopGroup() == null) {
                         long quietPeriodNanos = unit.toNanos(quietPeriod);
+                        if (timeoutInNanos < quietPeriodNanos) {
+                            quietPeriodNanos = 0;
+                        }
                         io.netty.util.concurrent.Future<?> nettyFuture = serviceManager.getGroup()
                                 .shutdownGracefully(quietPeriodNanos, timeoutInNanos, TimeUnit.NANOSECONDS);
                         CompletableFuture<Void> cf = new CompletableFuture<>();
