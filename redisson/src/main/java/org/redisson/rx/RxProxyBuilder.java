@@ -20,6 +20,8 @@ import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Single;
 import org.redisson.misc.ProxyBuilder;
 
+import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionStage;
 
@@ -38,6 +40,9 @@ public class RxProxyBuilder {
     public static <T> T create(CommandRxExecutor commandExecutor, Object instance, Object implementation, Class<T> clazz) {
         return ProxyBuilder.create((callable, instanceMethod) -> {
             Flowable<Object> flowable = commandExecutor.flowable((Callable<CompletionStage<Object>>) (Object) callable);
+            if (isStreamReadMethod(instanceMethod)) {
+                flowable = flowable.filter(r -> !(r instanceof Map && ((Map<?, ?>) r).isEmpty()));
+            }
 
             if (instanceMethod.getReturnType() == Completable.class) {
                 return flowable.ignoreElements();
@@ -47,6 +52,20 @@ public class RxProxyBuilder {
             }
             return flowable.singleElement();
         }, instance, implementation, clazz, commandExecutor.getServiceManager());
+    }
+
+    private static boolean isStreamReadMethod(Method method) {
+        if (!method.getName().equals("read") && !method.getName().equals("readGroup")) {
+            return false;
+        }
+
+        Class<?>[] parameterTypes = method.getParameterTypes();
+        if (parameterTypes.length == 0) {
+            return false;
+        }
+
+        Package pkg = parameterTypes[parameterTypes.length - 1].getPackage();
+        return pkg != null && "org.redisson.api.stream".equals(pkg.getName());
     }
     
 }

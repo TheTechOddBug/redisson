@@ -19,6 +19,8 @@ import org.redisson.misc.ProxyBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionStage;
 
@@ -36,12 +38,29 @@ public class ReactiveProxyBuilder {
     public static <T> T create(CommandReactiveExecutor commandExecutor, Object instance, Object implementation, Class<T> clazz) {
         return ProxyBuilder.create((callable, instanceMethod) -> {
             Mono<Object> result = commandExecutor.reactive((Callable<CompletionStage<Object>>) (Object) callable);
+            if (isStreamReadMethod(instanceMethod)) {
+                result = result.filter(r -> !(r instanceof Map && ((Map<?, ?>) r).isEmpty()));
+            }
             if (instanceMethod.getReturnType().isAssignableFrom(Flux.class)) {
                 Mono<Iterable> monoListResult = result.cast(Iterable.class);
                 return monoListResult.flatMapMany(Flux::fromIterable);
             }
             return result;
         }, instance, implementation, clazz, commandExecutor.getServiceManager());
+    }
+
+    private static boolean isStreamReadMethod(Method method) {
+        if (!method.getName().equals("read") && !method.getName().equals("readGroup")) {
+            return false;
+        }
+
+        Class<?>[] parameterTypes = method.getParameterTypes();
+        if (parameterTypes.length == 0) {
+            return false;
+        }
+
+        Package pkg = parameterTypes[parameterTypes.length - 1].getPackage();
+        return pkg != null && "org.redisson.api.stream".equals(pkg.getName());
     }
     
 }
