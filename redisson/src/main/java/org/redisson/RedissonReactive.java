@@ -66,20 +66,25 @@ public final class RedissonReactive implements RedissonReactiveClient {
     
     @Override
     public <K, V> RStreamReactive<K, V> getStream(String name) {
-        return ReactiveProxyBuilder.create(commandExecutor, new RedissonStream<K, V>(commandExecutor, name), RStreamReactive.class);
+        RedissonStream<K, V> stream = new RedissonStream<K, V>(commandExecutor, name);
+        return ReactiveProxyBuilder.create(commandExecutor, stream,
+                new RedissonStreamReactive<K, V>(commandExecutor, stream), RStreamReactive.class);
     }
 
     @Override
     public <K, V> RStreamReactive<K, V> getStream(String name, Codec codec) {
-        return ReactiveProxyBuilder.create(commandExecutor, new RedissonStream<K, V>(codec, commandExecutor, name), RStreamReactive.class);
+        RedissonStream<K, V> stream = new RedissonStream<K, V>(codec, commandExecutor, name);
+        return ReactiveProxyBuilder.create(commandExecutor, stream,
+                new RedissonStreamReactive<K, V>(commandExecutor, stream), RStreamReactive.class);
     }
 
     @Override
     public <K, V> RStreamReactive<K, V> getStream(PlainOptions options) {
         PlainParams params = (PlainParams) options;
         CommandReactiveExecutor ca = commandExecutor.copy(params);
-        return ReactiveProxyBuilder.create(commandExecutor,
-                new RedissonStream<K, V>(params.getCodec(), ca, params.getName()), RStreamReactive.class);
+        RedissonStream<K, V> stream = new RedissonStream<K, V>(params.getCodec(), ca, params.getName());
+        return ReactiveProxyBuilder.create(commandExecutor, stream,
+                new RedissonStreamReactive<K, V>(commandExecutor, stream), RStreamReactive.class);
     }
 
     @Override
