@@ -547,6 +547,12 @@ Available values:
 * `SLAVE` - Subscribe to slave nodes,  
 * `MASTER` - Subscribe to master node,  
 
+**fallbackLoadingToMaster**
+
+Default value: `true`
+
+Defines whether a read command should be redirected to the master node if a slave node returns a `LOADING` error. A slave returns this error while it is loading the dataset into memory (for example, just after startup or after a failover). When set to `true`, the command is automatically retried on the master node; when set to `false`, the `LOADING` error is propagated to the caller.
+
 **loadBalancer**
 
 Default value: `org.redisson.connection.balancer.RoundRobinLoadBalancer`
@@ -880,6 +886,12 @@ Available values:
 
 * `SLAVE` - Subscribe to slave nodes,  
 * `MASTER` - Subscribe to master node,  
+
+**fallbackLoadingToMaster**
+
+Default value: `true`
+
+Defines whether a read command should be redirected to the master node if a slave node returns a `LOADING` error. A slave returns this error while it is loading the dataset into memory (for example, just after startup or after a failover). When set to `true`, the command is automatically retried on the master node; when set to `false`, the `LOADING` error is propagated to the caller.
 
 **connectTimeout**
 
@@ -1310,6 +1322,12 @@ Available values:
 * `SLAVE` - Subscribe to slave nodes,  
 * `MASTER` - Subscribe to master node,  
 
+**fallbackLoadingToMaster**
+
+Default value: `true`
+
+Defines whether a read command should be redirected to the master node if a slave node returns a `LOADING` error. A slave returns this error while it is loading the dataset into memory (for example, just after startup or after a failover). When set to `true`, the command is automatically retried on the master node; when set to `false`, the `LOADING` error is propagated to the caller.
+
 **loadBalancer**
 
 Default value: `org.redisson.connection.balancer.RoundRobinLoadBalancer`
@@ -1617,6 +1635,12 @@ Available values:
 
 * `SLAVE` - Subscribe to slave nodes, 
 * `MASTER` - Subscribe to master node
+
+**fallbackLoadingToMaster**
+
+Default value: `true`
+
+Defines whether a read command should be redirected to the master node if a slave node returns a `LOADING` error. A slave returns this error while it is loading the dataset into memory (for example, just after startup or after a failover). When set to `true`, the command is automatically retried on the master node; when set to `false`, the `LOADING` error is propagated to the caller.
 
 **loadBalancer**
 
@@ -2169,6 +2193,12 @@ Available values:
 * `SLAVE` - Subscribe to slave nodes,  
 * `MASTER` - Subscribe to master node,  
 
+**fallbackLoadingToMaster**
+
+Default value: `true`
+
+Defines whether a read command should be redirected to the master node if a slave node returns a `LOADING` error. A slave returns this error while it is loading the dataset into memory (for example, just after startup or after a failover). When set to `true`, the command is automatically retried on the master node; when set to `false`, the `LOADING` error is propagated to the caller.
+
 **shardedSubscriptionMode**
 
 Default value: `AUTO`
@@ -2499,6 +2529,12 @@ Available values:
 
 * `SLAVE` - Subscribe to slave nodes,  
 * `MASTER` - Subscribe to master node,  
+
+**fallbackLoadingToMaster**
+
+Default value: `true`
+
+Defines whether a read command should be redirected to the master node if a slave node returns a `LOADING` error. A slave returns this error while it is loading the dataset into memory (for example, just after startup or after a failover). When set to `true`, the command is automatically retried on the master node; when set to `false`, the `LOADING` error is propagated to the caller.
 
 **loadBalancer**
 

@@ -807,3 +807,58 @@ Code example:
 	Single<Boolean> setRateRx = limiter.trySetRate(RateType.OVERALL, 5, 2, RateIntervalUnit.SECONDS);
     Completable acquireRx = limiter.acquire(3);
     ```
+
+## GCRA Rate Limiter
+Java implementation of Redis based [RGcra](https://static.javadoc.io/org.redisson/redisson/latest/org/redisson/api/RGcra.html) object is a rate limiter based on the [Generic Cell Rate Algorithm](https://en.wikipedia.org/wiki/Generic_cell_rate_algorithm). It restricts the rate of operations using a burst capacity and a token replenishment rate. State is stored in a single Redis key, so the limit applies across all threads regardless of the Redisson instance. This object is thread-safe.
+
+Requires Redis 8.8.0 or higher.
+
+Each call to `tryAcquire()` requests one or more tokens and returns a `GcraResult` with the following information:
+
+* `isLimited()` - `true` if the requested tokens couldn't be acquired
+* `getMaxTokens()` - maximum burst capacity
+* `getAvailableTokens()` - tokens currently available
+* `getRetryAfterSeconds()` - seconds to wait before the requested tokens can be acquired; `-1` when the call wasn't limited
+* `getFullBurstAfterSeconds()` - seconds to wait before full burst capacity is restored
+
+Code example:
+
+=== "Sync"
+    ```
+    RGcra gcra = redisson.getGcra("myLimiter");
+
+    // up to 4 tokens per second, with burst of 2 additional tokens
+    GcraResult result = gcra.tryAcquire(2, 4, Duration.ofSeconds(1));
+    if (!result.isLimited()) {
+        // request accepted
+    }
+
+    // acquire 3 tokens at once
+    GcraResult batch = gcra.tryAcquire(2, 4, Duration.ofSeconds(1), 3);
+    ```
+
+=== "Async"
+    ```
+    RGcraAsync gcra = redisson.getGcra("myLimiter");
+
+    RFuture<GcraResult> resultFuture = gcra.tryAcquireAsync(2, 4, Duration.ofSeconds(1));
+    RFuture<GcraResult> batchFuture = gcra.tryAcquireAsync(2, 4, Duration.ofSeconds(1), 3);
+    ```
+
+=== "Reactive"
+    ```
+    RedissonReactiveClient redisson = redissonClient.reactive();
+    RGcraReactive gcra = redisson.getGcra("myLimiter");
+
+    Mono<GcraResult> resultMono = gcra.tryAcquire(2, 4, Duration.ofSeconds(1));
+    Mono<GcraResult> batchMono = gcra.tryAcquire(2, 4, Duration.ofSeconds(1), 3);
+    ```
+
+=== "RxJava3"
+    ```
+    RedissonRxClient redisson = redissonClient.rxJava();
+    RGcraRx gcra = redisson.getGcra("myLimiter");
+
+    Single<GcraResult> resultRx = gcra.tryAcquire(2, 4, Duration.ofSeconds(1));
+    Single<GcraResult> batchRx = gcra.tryAcquire(2, 4, Duration.ofSeconds(1), 3);
+    ```
