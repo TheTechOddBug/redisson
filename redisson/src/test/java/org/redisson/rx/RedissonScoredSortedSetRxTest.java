@@ -1,5 +1,7 @@
 package org.redisson.rx;
 
+import io.reactivex.rxjava3.observers.TestObserver;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
@@ -8,6 +10,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -326,6 +329,31 @@ public class RedissonScoredSortedSetRxTest extends BaseRxTest {
         Assertions.assertEquals(3d, a[1].getScore(), 0);
         Assertions.assertEquals("c", a[0].getValue());
         Assertions.assertEquals("d", a[1].getValue());
+    }
+
+    @Test
+    public void testEmptyCollectionResultsAsAbsent() {
+        RScoredSortedSetRx<String> set = redisson.getScoredSortedSet("{simple}:empty");
+
+        assertNoValues(set.readAll().test());
+        assertNoValues(set.valueRange(0, -1).test());
+        assertNoValues(set.entryRange(0, -1).test());
+        assertNoValues(set.random(1).test());
+        assertNoValues(set.randomEntries(1).test());
+        assertNoValues(set.pollFirst(1).test());
+        assertNoValues(set.pollLast(1).test());
+        assertNoValues(set.pollFirstEntries(1).test());
+        assertNoValues(set.pollLastEntries(1).test());
+        assertNoValues(set.readIntersection("{simple}:other").test());
+        assertNoValues(set.readUnion("{simple}:other").test());
+        assertNoValues(set.readDiff("{simple}:other").test());
+    }
+
+    private static void assertNoValues(TestObserver<?> observer) {
+        observer.awaitDone(1, TimeUnit.SECONDS);
+        observer.assertNoErrors();
+        observer.assertComplete();
+        observer.assertNoValues();
     }
 
     @Test
