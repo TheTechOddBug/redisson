@@ -276,12 +276,20 @@ public class RedissonStream<K, V> extends RedissonExpirable implements RStream<K
 
     @Override
     public Map<String, Map<StreamMessageId, Map<K, V>>> readGroup(String groupName, String consumerName, StreamMultiReadGroupArgs args) {
-        return get(readGroupAsync(groupName, consumerName, args));
+        Map<String, Map<StreamMessageId, Map<K, V>>> result = get(readGroupAsync(groupName, consumerName, args));
+        if (result == null) {
+            return Collections.emptyMap();
+        }
+        return result;
     }
 
     @Override
     public Map<StreamMessageId, Map<K, V>> readGroup(String groupName, String consumerName, StreamReadGroupArgs args) {
-        return get(readGroupAsync(groupName, consumerName, args));
+        Map<StreamMessageId, Map<K, V>> result = get(readGroupAsync(groupName, consumerName, args));
+        if (result == null) {
+            return Collections.emptyMap();
+        }
+        return result;
     }
 
     @Override
@@ -424,7 +432,11 @@ public class RedissonStream<K, V> extends RedissonExpirable implements RStream<K
 
     @Override
     public Map<String, Map<StreamMessageId, Map<K, V>>> read(StreamMultiReadArgs args) {
-        return get(readAsync(args));
+        Map<String, Map<StreamMessageId, Map<K, V>>> result = get(readAsync(args));
+        if (result == null) {
+            return Collections.emptyMap();
+        }
+        return result;
     }
 
     @Override
@@ -459,7 +471,11 @@ public class RedissonStream<K, V> extends RedissonExpirable implements RStream<K
 
     @Override
     public Map<StreamMessageId, Map<K, V>> read(StreamReadArgs args) {
-        return get(readAsync(args));
+        Map<StreamMessageId, Map<K, V>> result = get(readAsync(args));
+        if (result == null) {
+            return Collections.emptyMap();
+        }
+        return result;
     }
 
     @Override
