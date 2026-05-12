@@ -6,10 +6,10 @@ Upgrade to __[Redisson PRO](https://redisson.pro/feature-comparison.html)__ with
 ### 12-May-2026 - 4.4.0 released
 
 Feature - Hibernate 7.3.x support  
+Feature - [GCRA Rate Limiter](https://redisson.pro/docs/data-and-services/objects/#gcra-rate-limiter) added (thanks to @bandalgomsu)  
 Feature - Non-Reentrant Locks implemented: [RLock](https://redisson.pro/docs/data-and-services/locks-and-synchronizers/#non-reentrant-lock) and [RFairLock](https://redisson.pro/docs/data-and-services/locks-and-synchronizers/#non-reentrant-fair-lock)  
 Feature - `entries(count)`, `values(count)`, `keySet(count)` methods added to `RMultimap`  
 Feature - `fallbackLoadingToMaster` setting added (thanks to @bandalgomsu)  
-Feature - GCRA Rate Limiting added (thanks to @bandalgomsu)  
 Feature - `RRateLimiter.set(RateLimiterArgs)` method added (thanks to @nhancdt2602)  
 Feature - `RRateLimiter.update(RateLimiterArgs)` method added (thanks to @nhancdt2602)  
 Feature - `RMapCache.putAll()` method added with idleTime parameter  
@@ -24,12 +24,27 @@ Feature - `RJsonBucket.set()` method added with Floating-point homogeneous array
 ‎Feature - `yieldDistanceAs()` and `shardKRatio()` methods added to `VectorSimilarityNearestNeighbors` params (thanks to @TrietMinh23)  
 Feature - `RedissonClient.shutdownAsync()` method added (thanks to @TrietMinh23)  
 Feature - `RStream.nack()` method added (thanks to @lamnt2008)  
+Feature - `datastoreMode`, `primaryDiscoveryMode` settings added to Multi Sentinel mode  
+Feature - `setSyncConfig()`, `setQueueSyncConfig()`, `setTopicSyncConfig()` methods added to JMS RedissonConnectionFactory  
 
 Improvement - io_uring migration from Netty incubator to graduated transport (4.2)  
 Improvement - cleanup: CompletableFutureWrapper of null with generic (thanks to @MukjepScarlet)  
 Improvement - refactor: replace LinkedList with ArrayList and ArrayDeque (thanks to @MukjepScarlet)  
 Improvement - refactor: replace anonymous objects with lambdas (thanks to @MukjepScarlet)  
 
+Fixed - `RReliableQueue` doesn't work with `nameMapper`  
+Fixed - `RReliablePubSubTopic` doesn't work with `nameMapper`  
+Fixed - JCache CacheManager should be run in fallback mode if Redisson config is incorrect  
+Fixed - `RReliablePubSubTopic` might miss messages published at the same moment with listener registration  
+Fixed - all named subscriptions in JMS now prefix the subscription name with the client ID (when set)  
+Fixed - unsubscribe cross-session active consumer check in JMS  
+Fixed - rejecting a second JMS consumer on the same unshared subscription even across different sessions  
+Fixed - durable JMS subscription metadata now stores the message selector alongside topic and noLocal  
+Fixed - JMSContext.close() MessageListener guard ordering  
+Fixed - JCache fallback mode isn't handled during CacheManager acquisition  
+Fixed - JCache fallback mode logs  
+Fixed - JMS shared non-durable subscription is only removed when the last consumer closes  
+Fixed - CancellationException is thrown by `RedisExecutor.addMetrics()` method  
 Fixed - `RStreamReactive` and `RStreamRx` should emit empty signal instead of empty Map and List objects  
 Fixed - return no singal instead of empty map for stream read/readGroup methods (thanks to @TrietMinh23)  
 Fixed - `RMap.copy()` fails with CROSSSLOT in Redis cluster mode (thanks to @ngyngcphu)  
