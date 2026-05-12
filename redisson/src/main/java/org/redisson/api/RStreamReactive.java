@@ -15,6 +15,7 @@
  */
 package org.redisson.api;
 
+import org.redisson.api.annotation.EmptyAsAbsent;
 import org.redisson.api.stream.*;
 import org.redisson.client.protocol.StreamEntryStatus;
 import reactor.core.publisher.Mono;
@@ -136,6 +137,7 @@ public interface RStreamReactive<K, V> extends RExpirableReactive {
      * @return list
      */
     @Deprecated
+    @EmptyAsAbsent
     Mono<List<PendingEntry>> listPending(String groupName, StreamMessageId startId, StreamMessageId endId, int count);
     
     /**
@@ -153,6 +155,7 @@ public interface RStreamReactive<K, V> extends RExpirableReactive {
      * @return list
      */
     @Deprecated
+    @EmptyAsAbsent
     Mono<List<PendingEntry>> listPending(String groupName, String consumerName, StreamMessageId startId, StreamMessageId endId, int count);
 
     /**
@@ -175,6 +178,7 @@ public interface RStreamReactive<K, V> extends RExpirableReactive {
      * @return list
      */
     @Deprecated
+    @EmptyAsAbsent
     Mono<List<PendingEntry>> listPending(String groupName, StreamMessageId startId, StreamMessageId endId, long idleTime, TimeUnit idleTimeUnit, int count);
 
     /**
@@ -198,6 +202,7 @@ public interface RStreamReactive<K, V> extends RExpirableReactive {
      * @return list
      */
     @Deprecated
+    @EmptyAsAbsent
     Mono<List<PendingEntry>> listPending(String groupName, String consumerName, StreamMessageId startId, StreamMessageId endId, long idleTime, TimeUnit idleTimeUnit, int count);
 
     /**
@@ -207,6 +212,7 @@ public interface RStreamReactive<K, V> extends RExpirableReactive {
      * @param args - method arguments object
      * @return list
      */
+    @EmptyAsAbsent
     Mono<List<PendingEntry>> listPending(StreamPendingRangeArgs args);
 
     /**
@@ -228,6 +234,7 @@ public interface RStreamReactive<K, V> extends RExpirableReactive {
      * @param count - amount of messages
      * @return map
      */
+    @EmptyAsAbsent
     Mono<Map<StreamMessageId, Map<K, V>>> pendingRange(String groupName, StreamMessageId startId, StreamMessageId endId, long idleTime, TimeUnit idleTimeUnit, int count);
 
     /**
@@ -250,6 +257,7 @@ public interface RStreamReactive<K, V> extends RExpirableReactive {
      * @param count - amount of messages
      * @return map
      */
+    @EmptyAsAbsent
     Mono<Map<StreamMessageId, Map<K, V>>> pendingRange(String groupName, String consumerName, StreamMessageId startId, StreamMessageId endId, long idleTime, TimeUnit idleTimeUnit, int count);
 
     /**
@@ -263,6 +271,7 @@ public interface RStreamReactive<K, V> extends RExpirableReactive {
      * @param ids - stream ids
      * @return stream data mapped by Stream ID
      */
+    @EmptyAsAbsent
     Mono<Map<StreamMessageId, Map<K, V>>> claim(String groupName, String consumerName, long idleTime, TimeUnit idleTimeUnit, StreamMessageId... ids);
 
     /**
@@ -307,6 +316,7 @@ public interface RStreamReactive<K, V> extends RExpirableReactive {
      * @param args - method arguments object
      * @return stream data mapped by stream name and Stream Message ID
      */
+    @EmptyAsAbsent
     Mono<Map<String, Map<StreamMessageId, Map<K, V>>>> readGroup(String groupName, String consumerName, StreamMultiReadGroupArgs args);
 
     /**
@@ -325,6 +335,7 @@ public interface RStreamReactive<K, V> extends RExpirableReactive {
      * @param args - method arguments object
      * @return stream data mapped by Stream Message ID
      */
+    @EmptyAsAbsent
     Mono<Map<StreamMessageId, Map<K, V>>> readGroup(String groupName, String consumerName, StreamReadGroupArgs args);
 
     /**
@@ -384,6 +395,7 @@ public interface RStreamReactive<K, V> extends RExpirableReactive {
      * @param args - method arguments object
      * @return stream data mapped by stream name and Stream Message ID
      */
+    @EmptyAsAbsent
     Mono<Map<String, Map<StreamMessageId, Map<K, V>>>> read(StreamMultiReadArgs args);
 
     /**
@@ -402,6 +414,7 @@ public interface RStreamReactive<K, V> extends RExpirableReactive {
      * @param args - method arguments object
      * @return stream data mapped by Stream Message ID
      */
+    @EmptyAsAbsent
     Mono<Map<StreamMessageId, Map<K, V>>> read(StreamReadArgs args);
 
     /**
@@ -412,6 +425,7 @@ public interface RStreamReactive<K, V> extends RExpirableReactive {
      * @return stream data mapped by Stream ID
      */
     @Deprecated
+    @EmptyAsAbsent
     Mono<Map<StreamMessageId, Map<K, V>>> range(StreamMessageId startId, StreamMessageId endId);
 
     /**
@@ -423,6 +437,7 @@ public interface RStreamReactive<K, V> extends RExpirableReactive {
      * @return stream data mapped by Stream ID
      */
     @Deprecated
+    @EmptyAsAbsent
     Mono<Map<StreamMessageId, Map<K, V>>> range(int count, StreamMessageId startId, StreamMessageId endId);
     
     /**
@@ -433,6 +448,7 @@ public interface RStreamReactive<K, V> extends RExpirableReactive {
      * @return stream data mapped by Stream ID
      */
     @Deprecated
+    @EmptyAsAbsent
     Mono<Map<StreamMessageId, Map<K, V>>> rangeReversed(StreamMessageId startId, StreamMessageId endId);
     
     /**
@@ -444,6 +460,7 @@ public interface RStreamReactive<K, V> extends RExpirableReactive {
      * @return stream data mapped by Stream ID
      */
     @Deprecated
+    @EmptyAsAbsent
     Mono<Map<StreamMessageId, Map<K, V>>> rangeReversed(int count, StreamMessageId startId, StreamMessageId endId);
 
     /**
@@ -452,6 +469,7 @@ public interface RStreamReactive<K, V> extends RExpirableReactive {
      * @param args - method arguments object
      * @return stream data mapped by Stream ID
      */
+    @EmptyAsAbsent
     Mono<Map<StreamMessageId, Map<K, V>>> range(StreamRangeArgs args);
 
     /**
@@ -460,6 +478,7 @@ public interface RStreamReactive<K, V> extends RExpirableReactive {
      * @param args - method arguments object
      * @return stream data mapped by Stream ID
      */
+    @EmptyAsAbsent
     Mono<Map<StreamMessageId, Map<K, V>>> rangeReversed(StreamRangeArgs args);
 
     /**
@@ -506,6 +525,7 @@ public interface RStreamReactive<K, V> extends RExpirableReactive {
      * 
      * @return list of info objects 
      */
+    @EmptyAsAbsent
     Mono<List<StreamGroup>> listGroups();
 
     /**
@@ -514,6 +534,7 @@ public interface RStreamReactive<K, V> extends RExpirableReactive {
      * @param groupName - name of group
      * @return list of info objects
      */
+    @EmptyAsAbsent
     Mono<List<StreamConsumer>> listConsumers(String groupName);
 
     /**
@@ -531,6 +552,7 @@ public interface RStreamReactive<K, V> extends RExpirableReactive {
      * @param count - amount of messages
      * @return map
      */
+    @EmptyAsAbsent
     Mono<Map<StreamMessageId, Map<K, V>>> pendingRange(String groupName, StreamMessageId startId, StreamMessageId endId, int count);
     
     /**
@@ -549,6 +571,7 @@ public interface RStreamReactive<K, V> extends RExpirableReactive {
      * @param count - amount of messages
      * @return map
      */
+    @EmptyAsAbsent
     Mono<Map<StreamMessageId, Map<K, V>>> pendingRange(String groupName, String consumerName, StreamMessageId startId, StreamMessageId endId, int count);
 
     /**

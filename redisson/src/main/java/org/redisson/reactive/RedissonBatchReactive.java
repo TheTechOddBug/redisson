@@ -43,15 +43,13 @@ public class RedissonBatchReactive implements RBatchReactive {
     @Override
     public <K, V> RStreamReactive<K, V> getStream(String name) {
         RedissonStream<K, V> stream = new RedissonStream<K, V>(executorService, name);
-        return ReactiveProxyBuilder.create(executorService, stream,
-                new RedissonStreamReactive<K, V>(executorService, stream), RStreamReactive.class);
+        return ReactiveProxyBuilder.create(executorService, stream, RStreamReactive.class);
     }
 
     @Override
     public <K, V> RStreamReactive<K, V> getStream(String name, Codec codec) {
         RedissonStream<K, V> stream = new RedissonStream<K, V>(codec, executorService, name);
-        return ReactiveProxyBuilder.create(executorService, stream,
-                new RedissonStreamReactive<K, V>(executorService, stream), RStreamReactive.class);
+        return ReactiveProxyBuilder.create(executorService, stream, RStreamReactive.class);
     }
     
     @Override
