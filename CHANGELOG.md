@@ -6,7 +6,7 @@ Upgrade to __[Redisson PRO](https://redisson.pro/feature-comparison.html)__ with
 ### 12-May-2026 - 4.4.0 released
 
 Feature - Hibernate 7.3.x support  
-Feature - Non-Reentrant Locks implemented: [RLock](https://redisson.pro/docs/data-and-services/locks-and-synchronizers/#non-reentrant-lock) and [RFairLock](https://redisson.pro/docs/data-and-services/locks-and-synchronizers/#non-reentrant-fair-lock)
+Feature - Non-Reentrant Locks implemented: [RLock](https://redisson.pro/docs/data-and-services/locks-and-synchronizers/#non-reentrant-lock) and [RFairLock](https://redisson.pro/docs/data-and-services/locks-and-synchronizers/#non-reentrant-fair-lock)  
 Feature - `entries(count)`, `values(count)`, `keySet(count)` methods added to `RMultimap`  
 Feature - `fallbackLoadingToMaster` setting added (thanks to @bandalgomsu)  
 Feature - GCRA Rate Limiting added (thanks to @bandalgomsu)  
