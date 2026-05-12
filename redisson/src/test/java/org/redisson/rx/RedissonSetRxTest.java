@@ -116,12 +116,12 @@ public class RedissonSetRxTest extends BaseRxTest {
     public void testIteratorSequence() {
         RSetRx<Long> set = redisson.getSet("set");
         for (int i = 0; i < 1000; i++) {
-            sync(set.add(Long.valueOf(i)));
+            sync(set.add((long) i));
         }
 
         Set<Long> setCopy = new HashSet<Long>();
         for (int i = 0; i < 1000; i++) {
-            setCopy.add(Long.valueOf(i));
+            setCopy.add((long) i);
         }
 
         checkIterator(set, setCopy);

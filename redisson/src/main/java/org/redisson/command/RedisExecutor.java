@@ -439,15 +439,15 @@ public class RedisExecutor<V, R> {
             if (RedisCommands.BLOCKING_COMMANDS.contains(command)) {
                 for (int i = 0; i < params.length-1; i++) {
                     if ("BLOCK".equals(params[i])) {
-                        popTimeout = Long.valueOf(params[i+1].toString());
+                        popTimeout = Long.parseLong(params[i+1].toString());
                         break;
                     }
                 }
             } else {
                 if (RedisCommands.BZMPOP.getName().equals(command.getName())) {
-                    popTimeout = Long.valueOf(params[0].toString()) * 1000;
+                    popTimeout = Long.parseLong(params[0].toString()) * 1000;
                 } else {
-                    popTimeout = Long.valueOf(params[params.length - 1].toString()) * 1000;
+                    popTimeout = Long.parseLong(params[params.length - 1].toString()) * 1000;
                 }
             }
 

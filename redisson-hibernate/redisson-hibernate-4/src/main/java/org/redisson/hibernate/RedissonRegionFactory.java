@@ -82,7 +82,7 @@ public class RedissonRegionFactory implements RegionFactory {
         this.settings = settings;
 
         String fallbackValue = (String) properties.getOrDefault(FALLBACK, "false");
-        fallback = Boolean.valueOf(fallbackValue);
+        fallback = Boolean.parseBoolean(fallbackValue);
     }
 
     protected RedissonClient createRedissonClient(Properties properties) {
