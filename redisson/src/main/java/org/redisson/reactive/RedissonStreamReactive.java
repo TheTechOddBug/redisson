@@ -16,14 +16,12 @@
 package org.redisson.reactive;
 
 import org.redisson.api.RStream;
-import org.redisson.api.stream.StreamMessageId;
-import org.redisson.api.stream.StreamMultiReadArgs;
-import org.redisson.api.stream.StreamMultiReadGroupArgs;
-import org.redisson.api.stream.StreamReadArgs;
-import org.redisson.api.stream.StreamReadGroupArgs;
+import org.redisson.api.stream.*;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -59,6 +57,127 @@ public class RedissonStreamReactive<K, V> {
 
     public Mono<Map<String, Map<StreamMessageId, Map<K, V>>>> readGroup(String groupName, String consumerName, StreamMultiReadGroupArgs args) {
         return commandExecutor.reactive(() -> instance.readGroupAsync(groupName, consumerName, args))
+                .filter(m -> !m.isEmpty());
+    }
+
+    public Mono<List<PendingEntry>> listPending(
+            String groupName, StreamMessageId startId, StreamMessageId endId, int count) {
+        return commandExecutor.reactive(() ->
+                        instance.listPendingAsync(groupName, startId, endId, count))
+                .filter(l -> !l.isEmpty());
+    }
+
+    public Mono<List<PendingEntry>> listPending(
+            String groupName, String consumerName,
+            StreamMessageId startId, StreamMessageId endId, int count) {
+        return commandExecutor.reactive(() ->
+                        instance.listPendingAsync(groupName, consumerName, startId, endId, count))
+                .filter(l -> !l.isEmpty());
+    }
+
+    public Mono<List<PendingEntry>> listPending(
+            String groupName, StreamMessageId startId, StreamMessageId endId,
+            long idleTime, TimeUnit idleTimeUnit, int count) {
+        return commandExecutor.reactive(() ->
+                        instance.listPendingAsync(groupName, startId, endId, idleTime, idleTimeUnit, count))
+                .filter(l -> !l.isEmpty());
+    }
+
+    public Mono<List<PendingEntry>> listPending(
+            String groupName, String consumerName,
+            StreamMessageId startId, StreamMessageId endId,
+            long idleTime, TimeUnit idleTimeUnit, int count) {
+        return commandExecutor.reactive(() ->
+                        instance.listPendingAsync(groupName, consumerName, startId, endId, idleTime, idleTimeUnit, count))
+                .filter(l -> !l.isEmpty());
+    }
+
+    public Mono<List<PendingEntry>> listPending(StreamPendingRangeArgs args) {
+        return commandExecutor.reactive(() -> instance.listPendingAsync(args))
+                .filter(l -> !l.isEmpty());
+    }
+
+    public Mono<List<StreamGroup>> listGroups() {
+        return commandExecutor.reactive(instance::listGroupsAsync)
+                .filter(l -> !l.isEmpty());
+    }
+
+    public Mono<List<StreamConsumer>> listConsumers(String groupName) {
+        return commandExecutor.reactive(() -> instance.listConsumersAsync(groupName))
+                .filter(l -> !l.isEmpty());
+    }
+
+    public Mono<Map<StreamMessageId, Map<K, V>>> range(
+            StreamMessageId startId, StreamMessageId endId) {
+        return commandExecutor.reactive(() -> instance.rangeAsync(startId, endId))
+                .filter(m -> !m.isEmpty());
+    }
+
+    public Mono<Map<StreamMessageId, Map<K, V>>> range(
+            int count, StreamMessageId startId, StreamMessageId endId) {
+        return commandExecutor.reactive(() -> instance.rangeAsync(count, startId, endId))
+                .filter(m -> !m.isEmpty());
+    }
+
+    public Mono<Map<StreamMessageId, Map<K, V>>> range(StreamRangeArgs args) {
+        return commandExecutor.reactive(() -> instance.rangeAsync(args))
+                .filter(m -> !m.isEmpty());
+    }
+
+    public Mono<Map<StreamMessageId, Map<K, V>>> rangeReversed(
+            StreamMessageId startId, StreamMessageId endId) {
+        return commandExecutor.reactive(() -> instance.rangeReversedAsync(startId, endId))
+                .filter(m -> !m.isEmpty());
+    }
+
+    public Mono<Map<StreamMessageId, Map<K, V>>> rangeReversed(
+            int count, StreamMessageId startId, StreamMessageId endId) {
+        return commandExecutor.reactive(() -> instance.rangeReversedAsync(count, startId, endId))
+                .filter(m -> !m.isEmpty());
+    }
+
+    public Mono<Map<StreamMessageId, Map<K, V>>> rangeReversed(StreamRangeArgs args) {
+        return commandExecutor.reactive(() -> instance.rangeReversedAsync(args))
+                .filter(m -> !m.isEmpty());
+    }
+
+    public Mono<Map<StreamMessageId, Map<K, V>>> pendingRange(
+            String groupName, StreamMessageId startId, StreamMessageId endId, int count) {
+        return commandExecutor.reactive(() ->
+                        instance.pendingRangeAsync(groupName, startId, endId, count))
+                .filter(m -> !m.isEmpty());
+    }
+
+    public Mono<Map<StreamMessageId, Map<K, V>>> pendingRange(
+            String groupName, String consumerName,
+            StreamMessageId startId, StreamMessageId endId, int count) {
+        return commandExecutor.reactive(() ->
+                        instance.pendingRangeAsync(groupName, consumerName, startId, endId, count))
+                .filter(m -> !m.isEmpty());
+    }
+
+    public Mono<Map<StreamMessageId, Map<K, V>>> pendingRange(
+            String groupName, StreamMessageId startId, StreamMessageId endId,
+            long idleTime, TimeUnit idleTimeUnit, int count) {
+        return commandExecutor.reactive(() ->
+                        instance.pendingRangeAsync(groupName, startId, endId, idleTime, idleTimeUnit, count))
+                .filter(m -> !m.isEmpty());
+    }
+
+    public Mono<Map<StreamMessageId, Map<K, V>>> pendingRange(
+            String groupName, String consumerName,
+            StreamMessageId startId, StreamMessageId endId,
+            long idleTime, TimeUnit idleTimeUnit, int count) {
+        return commandExecutor.reactive(() ->
+                        instance.pendingRangeAsync(groupName, consumerName, startId, endId, idleTime, idleTimeUnit, count))
+                .filter(m -> !m.isEmpty());
+    }
+
+    public Mono<Map<StreamMessageId, Map<K, V>>> claim(
+            String groupName, String consumerName,
+            long idleTime, TimeUnit idleTimeUnit, StreamMessageId... ids) {
+        return commandExecutor.reactive(() ->
+                        instance.claimAsync(groupName, consumerName, idleTime, idleTimeUnit, ids))
                 .filter(m -> !m.isEmpty());
     }
 
