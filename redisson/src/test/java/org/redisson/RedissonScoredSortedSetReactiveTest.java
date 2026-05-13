@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.redisson.api.RScoredSortedSetReactive;
 import org.redisson.client.codec.StringCodec;
 import org.redisson.client.protocol.ScoredEntry;
+import reactor.test.StepVerifier;
 
 public class RedissonScoredSortedSetReactiveTest extends BaseReactiveTest {
 
@@ -312,6 +313,22 @@ public class RedissonScoredSortedSetReactiveTest extends BaseReactiveTest {
         Assertions.assertEquals(3d, a[1].getScore(), 0);
         Assertions.assertEquals("c", a[0].getValue());
         Assertions.assertEquals("d", a[1].getValue());
+    }
+
+    @Test
+    public void testEmptyCollectionResultsAsAbsent() {
+        RScoredSortedSetReactive<String> set = redisson.getScoredSortedSet("{simple}:empty");
+
+        set.readAll().as(StepVerifier::create).verifyComplete();
+        set.valueRange(0, -1).as(StepVerifier::create).verifyComplete();
+        set.entryRange(0, -1).as(StepVerifier::create).verifyComplete();
+        set.random(1).as(StepVerifier::create).verifyComplete();
+        set.randomEntries(1).as(StepVerifier::create).verifyComplete();
+        set.pollFirst(1).as(StepVerifier::create).verifyComplete();
+        set.pollLast(1).as(StepVerifier::create).verifyComplete();
+        set.readIntersection("{simple}:other").as(StepVerifier::create).verifyComplete();
+        set.readUnion("{simple}:other").as(StepVerifier::create).verifyComplete();
+        set.readDiff("{simple}:other").as(StepVerifier::create).verifyComplete();
     }
 
     @Test
