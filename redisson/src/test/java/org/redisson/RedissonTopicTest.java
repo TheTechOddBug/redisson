@@ -900,8 +900,8 @@ public class RedissonTopicTest extends RedisDockerTest {
             Runnable rLockPayload =
                     () -> {
                         try {
-                            Integer randomLock = ThreadLocalRandom.current().nextInt(100);
-                            RLock lock = redissonClient.getLock(randomLock.toString());
+                            int randomLock = ThreadLocalRandom.current().nextInt(100);
+                            RLock lock = redissonClient.getLock(Integer.toString(randomLock));
                             lock.lock(10, TimeUnit.SECONDS);
                             lock.unlock();
                             status.add("ok");
@@ -1305,8 +1305,8 @@ public class RedissonTopicTest extends RedisDockerTest {
             Runnable rLockPayload =
                     () -> {
                         try {
-                            Integer randomLock = ThreadLocalRandom.current().nextInt(100);
-                            RLock lock = redissonClient.getLock(randomLock.toString());
+                            int randomLock = ThreadLocalRandom.current().nextInt(100);
+                            RLock lock = redissonClient.getLock(Integer.toString(randomLock));
                             lock.lock(10, TimeUnit.SECONDS);
                             lock.unlock();
 

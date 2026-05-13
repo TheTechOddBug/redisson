@@ -61,20 +61,20 @@ public class BaseRegion implements TransactionalDataRegion, GeneralDataRegion {
         
         String maxEntries = getProperty(properties, mapCache.getName(), defaultKey, RedissonRegionFactory.MAX_ENTRIES_SUFFIX);
         if (maxEntries != null) {
-            size = Integer.valueOf(maxEntries);
+            size = Integer.parseInt(maxEntries);
             mapCache.setMaxSize(size);
         }
         String timeToLive = getProperty(properties, mapCache.getName(), defaultKey, RedissonRegionFactory.TTL_SUFFIX);
         if (timeToLive != null) {
-            ttl = Integer.valueOf(timeToLive);
+            ttl = Integer.parseInt(timeToLive);
         }
         String maxIdleTime = getProperty(properties, mapCache.getName(), defaultKey, RedissonRegionFactory.MAX_IDLE_SUFFIX);
         if (maxIdleTime != null) {
-            maxIdle = Integer.valueOf(maxIdleTime);
+            maxIdle = Integer.parseInt(maxIdleTime);
         }
 
         String fallbackValue = (String) properties.getOrDefault(RedissonRegionFactory.FALLBACK, "false");
-        fallback = Boolean.valueOf(fallbackValue);
+        fallback = Boolean.parseBoolean(fallbackValue);
     }
 
     private String getProperty(Properties properties, String name, String defaultKey, String suffix) {

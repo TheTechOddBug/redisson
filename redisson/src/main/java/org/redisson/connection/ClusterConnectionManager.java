@@ -760,7 +760,7 @@ public class ClusterConnectionManager extends MasterSlaveConnectionManager {
             log.info("{} slots removed", removedSlots.size());
         }
 
-        Integer addedSlots = 0;
+        int addedSlots = 0;
         for (ClusterPartition clusterPartition : newPartitions) {
             MasterSlaveEntry entry = getEntry(clusterPartition.getMasterAddress());
             for (Integer slot : clusterPartition.getSlots()) {

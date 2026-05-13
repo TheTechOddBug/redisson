@@ -3,6 +3,78 @@ Redisson Releases History
 
 Upgrade to __[Redisson PRO](https://redisson.pro/feature-comparison.html)__ with **advanced features**.
 
+### 12-May-2026 - 4.4.0 released
+
+Feature - Hibernate 7.3.x support  
+Feature - [GCRA Rate Limiter](https://redisson.pro/docs/data-and-services/objects/#gcra-rate-limiter) added (thanks to @bandalgomsu)  
+Feature - Non-Reentrant Locks implemented: [RLock](https://redisson.pro/docs/data-and-services/locks-and-synchronizers/#non-reentrant-lock) and [RFairLock](https://redisson.pro/docs/data-and-services/locks-and-synchronizers/#non-reentrant-fair-lock)  
+Feature - `entries(count)`, `values(count)`, `keySet(count)` methods added to `RMultimap`  
+Feature - `fallbackLoadingToMaster` setting added (thanks to @bandalgomsu)  
+Feature - `RRateLimiter.set(RateLimiterArgs)` method added (thanks to @nhancdt2602)  
+Feature - `RRateLimiter.update(RateLimiterArgs)` method added (thanks to @nhancdt2602)  
+Feature - `RMapCache.putAll()` method added with idleTime parameter  
+Feature - `RBloomFilter.exists(Collection<T>)` method added (thanks to @nhancdt2602)  
+Feature - `MapIncrListener`, `DequeAddFirstListener`, `DequeAddLastListener` added (thanks to @nhancdt2602)  
+Feature - `SetInterStoreListener`, `SetUnionStoreListener`, `SetDiffStoreListener`, `ScoredSortedSetIncrListener`, `ScoredSortedSetUnionStoreListener`, `ScoredSortedSetInterStoreListener`, `ScoredSortedSetDiffStoreListener` added  
+Feature - `profileSearch()` and `profileAggregate()` methods added to `RSearch`  
+Feature - collection field index support for RLiveObject (thanks to @ngyngcphu)  
+Feature - `dnsMonitoringTimes` setting added (thanks to @seakider)  
+Feature - `RScoredSortedSet.Aggregate.COUNT` option added (thanks to @TrietMinh23)  
+Feature - `RJsonBucket.set()` method added with Floating-point homogeneous array precision type (thanks to @TrietMinh23)  
+‎Feature - `yieldDistanceAs()` and `shardKRatio()` methods added to `VectorSimilarityNearestNeighbors` params (thanks to @TrietMinh23)  
+Feature - `RedissonClient.shutdownAsync()` method added (thanks to @TrietMinh23)  
+Feature - `RStream.nack()` method added (thanks to @lamnt2008)  
+Feature - `datastoreMode`, `primaryDiscoveryMode` settings added to Multi Sentinel mode  
+Feature - `setSyncConfig()`, `setQueueSyncConfig()`, `setTopicSyncConfig()` methods added to JMS RedissonConnectionFactory  
+
+Improvement - io_uring migration from Netty incubator to graduated transport (4.2)  
+Improvement - cleanup: CompletableFutureWrapper of null with generic (thanks to @MukjepScarlet)  
+Improvement - refactor: replace LinkedList with ArrayList and ArrayDeque (thanks to @MukjepScarlet)  
+Improvement - refactor: replace anonymous objects with lambdas (thanks to @MukjepScarlet)  
+
+Fixed - `RReliableQueue` doesn't work with `nameMapper`  
+Fixed - `RReliablePubSubTopic` doesn't work with `nameMapper`  
+Fixed - JCache CacheManager should be run in fallback mode if Redisson config is incorrect  
+Fixed - `RReliablePubSubTopic` might miss messages published at the same moment with listener registration  
+Fixed - all named subscriptions in JMS now prefix the subscription name with the client ID (when set)  
+Fixed - unsubscribe cross-session active consumer check in JMS  
+Fixed - rejecting a second JMS consumer on the same unshared subscription even across different sessions  
+Fixed - durable JMS subscription metadata now stores the message selector alongside topic and noLocal  
+Fixed - JMSContext.close() MessageListener guard ordering  
+Fixed - JCache fallback mode isn't handled during CacheManager acquisition  
+Fixed - JCache fallback mode logs  
+Fixed - JMS shared non-durable subscription is only removed when the last consumer closes  
+Fixed - CancellationException is thrown by `RedisExecutor.addMetrics()` method  
+Fixed - `RStreamReactive` and `RStreamRx` should emit empty signal instead of empty Map and List objects  
+Fixed - return no singal instead of empty map for stream read/readGroup methods (thanks to @TrietMinh23)  
+Fixed - `RMap.copy()` fails with CROSSSLOT in Redis cluster mode (thanks to @ngyngcphu)  
+Fixed - `RSearch.readCursor()` doesn't work in RESP3  
+Fixed - `RJsonBucket.getKeys()` doesn't work in RESP3  
+Fixed - RReadWriteLock cross-instance zombie renewal (thanks to @ngyngcphu)  
+Fixed - `RLiveObject.findIds()` method throws StringIndexOutOfBoundsException (thanks to @ngyngcphu)  
+Fixed - `RPriorityQueue` failed to maintain order under high concurrency with replica read (thanks to @nhancdt2602)  
+Fixed - cap `RLock` timeout to max long when overflow occurs (thanks to @nhancdt2602)  
+Fixed - long type should be used as timeouts in lock objects  
+Fixed - attempt to unlock lock, not locked by current thread by node id (thanks to @nhancdt2602)  
+Fixed - RedisNodeNotFoundException in cluster mode due to incorrect slot calculation for RRemoteService and RExecutorService (thanks to @ngyngcphu)  
+Fixed - `RKeysRx.getKeys()` doesn't return all keys by pattern  
+Fixed - `RSortedSet` comparator without declared constructor can't be used  
+Fixed - `nameMapper` isn't applied if scheduled task was cancelled  
+Fixed - `nameMapper` isn't applied to tasks running by cron schedule  
+Fixed - ClassCastException from `RemoteServiceResponse` to `RemoteServiceAck` (thanks to @nhancdt2602)  
+Fixed - unable to delete Set inside a Transaction if a write operation is queued (thanks to @seakider)  
+Fixed - Pub/Sub channels can't be re-authenticated  
+Fixed - connection leak in `RScheduledExecutorService` and `RRemoteService`  
+Fixed - `delete()` method doesn't work in RedissonTransactionalLocalCachedMap (thanks to @seakider)  
+Fixed - empty result for `XREADGROUP`, `BLMPOP`, `BZMPOP` commands isn't handled properly if read timeout occurs  
+Fixed - incorrect LocalCachedMap behavior within a transaction (thanks to @seakider)  
+Fixed - `NullPointerException` in MasterConnectionPool if no entries in pool (thanks to @nhancdt2602)  
+Fixed - don't cancel connection acquisition for blocking commands if retry timeout reached  
+Fixed - `ClassCastException` in Apache Tomcat Session loading due to unsafe numeric casts (thanks to @leonroars)  
+Fixed - cluster detection in single mode (thanks to @bandalgomsu)  
+Fixed - `RedisURI.toString()` leaks password in plaintext in exception message and logs (thanks to @Woongi9)  
+Fixed - `RSearch.info()` method doesn't return index prefixes information  
+
 ### 6-Apr-2026 - 4.3.1 released
 
 Feature - `RQueue.indexOf()` method added (thanks to @seakider)  
