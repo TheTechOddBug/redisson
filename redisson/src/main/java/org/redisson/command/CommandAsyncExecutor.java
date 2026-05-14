@@ -24,6 +24,7 @@ import org.redisson.client.RedisClient;
 import org.redisson.client.RedisException;
 import org.redisson.client.codec.Codec;
 import org.redisson.client.protocol.RedisCommand;
+import org.redisson.config.ReadMode;
 import org.redisson.connection.ConnectionManager;
 import org.redisson.connection.MasterSlaveEntry;
 import org.redisson.connection.ServiceManager;
@@ -47,6 +48,8 @@ public interface CommandAsyncExecutor {
     CommandAsyncExecutor copy(ObjectParams objectParams);
 
     CommandAsyncExecutor copy(boolean trackChanges);
+
+    ReadMode getReadMode();
 
     RedissonObjectBuilder getObjectBuilder();
 

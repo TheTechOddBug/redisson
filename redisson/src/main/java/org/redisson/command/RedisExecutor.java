@@ -36,6 +36,7 @@ import org.redisson.client.protocol.RedisCommands;
 import org.redisson.client.protocol.decoder.ListMultiDecoder2;
 import org.redisson.client.protocol.decoder.ObjectListReplayDecoder;
 import org.redisson.config.DelayStrategy;
+import org.redisson.config.ReadMode;
 import org.redisson.connection.ClientConnectionsEntry;
 import org.redisson.connection.ConnectionManager;
 import org.redisson.connection.MasterSlaveEntry;
@@ -78,6 +79,7 @@ public class RedisExecutor<V, R> {
     final DelayStrategy retryStrategy;
     final int responseTimeout;
     final boolean trackChanges;
+    final ReadMode readMode;
 
     long retryInterval;
     CompletableFuture<RedisConnection> connectionFuture;
@@ -96,7 +98,7 @@ public class RedisExecutor<V, R> {
                          ConnectionManager connectionManager, RedissonObjectBuilder objectBuilder,
                          RedissonObjectBuilder.ReferenceType referenceType, boolean noRetry,
                          int retryAttempts, DelayStrategy retryStrategy, int responseTimeout,
-                         boolean trackChanges) {
+                         boolean trackChanges, ReadMode readMode) {
         super();
         this.readOnlyMode = readOnlyMode;
         this.source = source;
@@ -114,6 +116,7 @@ public class RedisExecutor<V, R> {
         this.responseTimeout = responseTimeout;
         this.referenceType = referenceType;
         this.trackChanges = trackChanges;
+        this.readMode = readMode;
     }
 
     public void execute() {
@@ -775,7 +778,7 @@ public class RedisExecutor<V, R> {
 
     private void release(RedisConnection connection) {
         if (readOnlyMode) {
-            entry.releaseRead(connection);
+            entry.releaseRead(connection, readMode);
         } else {
             entry.releaseWrite(connection);
         }
@@ -873,10 +876,10 @@ public class RedisExecutor<V, R> {
             return entry.connectionReadOp(command, source.getAddr());
         }
         if (source.getRedisClient() != null) {
-            return entry.connectionReadOp(command, source.getRedisClient(), trackChanges);
+            return entry.connectionReadOp(command, source.getRedisClient(), trackChanges, readMode);
         }
 
-        return entry.connectionReadOp(command, trackChanges);
+        return entry.connectionReadOp(command, trackChanges, readMode);
     }
 
     final CompletableFuture<RedisConnection> connectionWriteOp(RedisCommand<?> command, CompletableFuture<R> attemptPromise) {
